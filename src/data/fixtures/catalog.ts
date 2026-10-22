@@ -167,7 +167,7 @@ export const meals: Meal[] = [
     },
     allergens: ["gluten", "celery"],
     mayContain: [],
-    dietary: ["vegan", "vegetarian", "pork_free"],
+    dietary: ["vegetarian", "vegan", "pork_free"],
     image: null,
   },
   {
@@ -185,7 +185,7 @@ export const meals: Meal[] = [
     },
     allergens: ["mustard"],
     mayContain: [],
-    dietary: ["vegan", "vegetarian", "pork_free"],
+    dietary: ["vegetarian", "vegan", "pork_free"],
     image: {
       src: "/assets/images/curry-800.webp",
       width: 800,
@@ -211,7 +211,7 @@ export const meals: Meal[] = [
     },
     allergens: ["celery"],
     mayContain: ["mustard"],
-    dietary: ["vegan", "vegetarian", "pork_free"],
+    dietary: ["vegetarian", "vegan", "pork_free"],
     image: null,
   },
 ];

@@ -273,7 +273,7 @@ export const en: Dictionary = {
     whatNextSteps: [
       "The cook would confirm the reservation, or decline it if they can't prepare it.",
       "You'd receive the exact address and pickup instructions.",
-      "Payment would be handled securely through the platform: it isn't live yet.",
+      "Payment would be handled through the platform: it isn't live yet.",
     ],
     reference: "Demo reference",
     status: "Status",

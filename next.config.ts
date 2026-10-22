@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  async rewrites() {
+    // Browsers ask for /favicon.ico by default; serve the existing PNG icon.
+    return [{ source: "/favicon.ico", destination: "/favicon-32.png" }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

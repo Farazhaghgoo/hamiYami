@@ -280,7 +280,7 @@ export const it = {
     whatNextSteps: [
       "Il cuoco confermerebbe la prenotazione o, se non può prepararla, la rifiuterebbe.",
       "Riceveresti l'indirizzo esatto e le istruzioni per il ritiro.",
-      "Il pagamento avverrebbe in modo sicuro tramite la piattaforma: non è ancora attivo.",
+      "Il pagamento sarebbe gestito tramite la piattaforma: non è ancora attivo.",
     ],
     reference: "Codice demo",
     status: "Stato",
