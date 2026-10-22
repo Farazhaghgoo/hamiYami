@@ -40,12 +40,14 @@ Runs the backend validation and storage tests (`tests/signup.test.js`).
 public/                    ← the website (deploy this folder)
   index.html               all page copy and structure
   privacy.html             Privacy Notice placeholder (blocker 2)
-  favicon.svg
+  favicon.svg, favicon-32.png, apple-touch-icon.png
+  assets/brand/            logo files used by the site (see Brand assets)
   assets/css/styles.css    design tokens (:root) and all styles
   assets/js/config.js      public settings: form endpoint, partners link, analytics hook
   assets/js/main.js        navigation, example dialogs, FAQ, form logic
   assets/fonts/            self-hosted Fraunces + Figtree (SIL Open Font License)
   assets/images/           optimised WebP photos + og-image.png
+brand-source/              original logo files as supplied (not deployed)
 api/signup.js              serverless signup function (Vercel)
 lib/signup.js              validation, spam checks, Supabase storage (shared)
 supabase/schema.sql        table for signups
@@ -67,6 +69,21 @@ Keep these when editing:
 - Validation messages are in `main.js` and `lib/signup.js`. Keep the two in sync.
 
 Colours, fonts, spacing and radii are CSS variables at the top of `styles.css`. Text colour pairs were chosen to meet WCAG AA. Re-check contrast if you change them.
+
+## Brand assets
+
+The logos were supplied by HamiYami. The originals are in `brand-source/`. For the site, they were traced into SVG so they stay sharp at any size and stay small:
+
+| File | Used for |
+|---|---|
+| `public/assets/brand/hamiyami-wordmark.svg` | Header logo, Privacy Notice header, sharing image (red, `#BA2E1C` sampled from the supplied artwork) |
+| `public/assets/brand/hamiyami-wordmark-light.svg` | Footer logo on the dark background (cream `#FFF8EF`) |
+| `public/favicon.svg`, `public/assets/brand/hamiyami-icon.svg` | Browser tab icon (the "HY" icon) |
+| `public/favicon-32.png` | PNG fallback for browsers without SVG favicons |
+| `public/apple-touch-icon.png` | iOS home-screen icon (180×180, full-bleed red so iOS can round the corners) |
+| `public/assets/brand/hamiyami-icon-512.png` | Spare high-resolution icon |
+
+The traces were checked side by side against the originals, but they are close copies, not the master artwork. If the designer has vector originals (SVG, AI or PDF), drop them in with the same file names. The header size is set by `.wordmark img { height }` in `styles.css`. After changing the wordmark, run `npm run og-image` to refresh the sharing image.
 
 ## Images
 
