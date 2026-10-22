@@ -1,0 +1,38 @@
+<!doctype html>
+<!--
+  Source for public/assets/images/og-image.png (1200×630 social sharing image).
+  Re-render after edits with: npm run og-image   (needs Microsoft Edge or Chrome installed)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @font-face { font-family: "Fraunces"; src: url("../public/assets/fonts/fraunces-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Figtree"; src: url("../public/assets/fonts/figtree-latin-wght-normal.woff2") format("woff2"); font-weight: 300 900; }
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+    body {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      background: #FFF8EF;
+      color: #28251F;
+      font-family: "Figtree", sans-serif;
+    }
+    .copy { display: flex; flex-direction: column; justify-content: center; padding: 0 36px 0 80px; }
+    .wordmark { font-family: "Fraunces", serif; font-weight: 700; font-size: 44px; letter-spacing: -0.025em; }
+    .wordmark span { color: #BA392B; }
+    h1 { margin: 52px 0 0; font-family: "Fraunces", serif; font-weight: 650; font-size: 74px; line-height: 1; letter-spacing: -0.035em; }
+    h1 span { color: #BA392B; }
+    p { margin: 34px 0 0; font-size: 28px; color: #5E574C; }
+    .media { position: relative; }
+    .media img { position: absolute; inset: 40px 40px 40px 0; width: calc(100% - 40px); height: calc(100% - 80px); object-fit: cover; border-radius: 32px; }
+  </style>
+</head>
+<body>
+  <div class="copy">
+    <div class="wordmark">Hami<span>Yami</span></div>
+    <h1>Homemade food.<br><span>Made nearby.</span></h1>
+    <p>A planned marketplace for meals from local cooks in Italy.</p>
+  </div>
+  <div class="media"><img src="../public/assets/images/hero-960.webp" alt=""></div>
+</body>
+</html>
