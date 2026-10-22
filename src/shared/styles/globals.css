@@ -124,6 +124,28 @@ textarea {
   border: 0;
 }
 
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-charcoal);
+  color: var(--color-cream);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Programmatically focused page headings scroll clear of the sticky header. */
+main:focus {
+  outline: none;
+}
+
 .page-section {
   padding-block: var(--section-pad);
 }

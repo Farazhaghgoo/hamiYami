@@ -1,0 +1,110 @@
+/*
+ * Button rules: pill shape, at least 44px tall, one primary action per view.
+ * primary = tomato (main action) · secondary = outlined charcoal · quiet = text-like
+ */
+.button {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-charcoal);
+  --btn-border: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: var(--control-h);
+  padding: 0.7rem 1.35rem;
+  border: 2px solid var(--btn-border);
+  border-radius: var(--radius-pill);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration) ease,
+    color var(--duration) ease,
+    border-color var(--duration) ease;
+}
+
+.button:hover {
+  text-decoration: none;
+}
+
+.primary {
+  --btn-bg: var(--color-tomato);
+  --btn-border: var(--color-tomato);
+  --btn-fg: #fff;
+}
+
+.primary:hover {
+  --btn-bg: var(--color-tomato-dark);
+  --btn-border: var(--color-tomato-dark);
+}
+
+.secondary {
+  --btn-border: var(--color-charcoal);
+}
+
+.secondary:hover {
+  --btn-bg: var(--color-charcoal);
+  --btn-fg: var(--color-cream);
+}
+
+.quiet {
+  --btn-fg: var(--color-tomato-ink);
+  padding-inline: 0.75rem;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.quiet:hover {
+  --btn-bg: var(--color-tomato-tint);
+}
+
+.light {
+  --btn-bg: var(--color-cream);
+  --btn-border: var(--color-cream);
+  --btn-fg: var(--color-tomato-ink);
+}
+
+.light:hover {
+  --btn-bg: #fff;
+  --btn-border: #fff;
+}
+
+.sm {
+  min-height: var(--control-h-sm);
+  padding: 0.45rem 1rem;
+  font-size: var(--text-sm);
+}
+
+.lg {
+  min-height: 54px;
+  padding: 0.85rem 1.6rem;
+  font-size: var(--text-base);
+}
+
+.block {
+  width: 100%;
+}
+
+.button[aria-disabled="true"],
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button[aria-busy="true"] {
+  cursor: progress;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

@@ -1,0 +1,240 @@
+"use client";
+
+import Link from "next/link";
+import { useId, useState } from "react";
+import { useDemoQuery } from "@/data/demo/DemoProvider";
+import { DIETARY_TAGS, type DietaryTag } from "@/domain/food-info";
+import type { MenuWindow } from "@/domain/menu-window";
+import { eur } from "@/domain/money";
+import { useI18n } from "@/i18n/I18nProvider";
+import { buttonClass } from "@/shared/ui/button";
+import { Icon } from "@/shared/ui/Icon";
+import {
+  discoverMeals,
+  EMPTY_FILTERS,
+  filtersToSearchParams,
+  hasActiveFilters,
+  PRICE_FILTER_OPTIONS,
+  type DiscoveryFilters,
+  type DiscoveryResult,
+} from "../discovery";
+import { MealCard } from "./MealCard";
+import gridStyles from "./MealGrid.module.css";
+import styles from "./DiscoveryView.module.css";
+
+export function DiscoveryView({
+  menu,
+  initialFilters,
+  initialResult,
+}: {
+  menu: MenuWindow;
+  initialFilters: DiscoveryFilters;
+  initialResult: DiscoveryResult;
+}) {
+  const { t, format, plural, shortDate, money, href } = useI18n();
+  const [filters, setFilters] = useState(initialFilters);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const panelId = useId();
+
+  const { data: result } = useDemoQuery(
+    `discover:${JSON.stringify(filters)}`,
+    (repos, now) => discoverMeals(repos.catalog, menu, filters, now),
+    initialResult,
+  );
+
+  const pilot = result.neighborhoods.find((n) => n.isPilot) ?? null;
+  const browsingPilot = result.neighborhood?.isPilot ?? false;
+  const active = hasActiveFilters(filters, pilot?.id ?? null);
+  const secondaryCount = filters.diet.length + (filters.maxPriceCents !== null ? 1 : 0);
+
+  function update(next: Partial<DiscoveryFilters>) {
+    const merged = { ...filters, ...next };
+    setFilters(merged);
+    // Filters live in the URL so results can be shared and survive reloads. They never hold
+    // personal data. Next.js keeps useSearchParams in sync with history.replaceState.
+    const query = filtersToSearchParams(merged).toString();
+    window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
+  }
+
+  function resetFilters() {
+    update({ ...EMPTY_FILTERS });
+  }
+
+  return (
+    <div className={styles.layout}>
+      <section className={styles.filters} aria-labelledby={`${panelId}-title`}>
+        <h2 id={`${panelId}-title`} className="visually-hidden">
+          {t.meals.filtersTitle}
+        </h2>
+
+        <div className={styles.primaryFilters}>
+          <div className={styles.neighborhood}>
+            <label htmlFor={`${panelId}-nb`} className={styles.label}>
+              {t.meals.neighborhood}
+            </label>
+            <select
+              id={`${panelId}-nb`}
+              className={styles.select}
+              value={filters.neighborhood ?? pilot?.id ?? ""}
+              onChange={(event) =>
+                update({ neighborhood: event.target.value === pilot?.id ? null : event.target.value })
+              }
+            >
+              {result.neighborhoods.map((n) => (
+                <option key={n.id} value={n.id}>
+                  {format(n.isPilot ? t.meals.neighborhoodPilot : t.meals.neighborhoodLater, { name: n.name })}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <fieldset className={styles.dates}>
+            <legend className={styles.label}>{t.meals.date}</legend>
+            <div className={styles.chips}>
+              <label className={styles.chip}>
+                <input
+                  type="radio"
+                  name="date"
+                  value=""
+                  checked={filters.date === null}
+                  onChange={() => update({ date: null })}
+                />
+                <span>{t.meals.allDates}</span>
+              </label>
+              {menu.dates.map((date) => (
+                <label key={date} className={styles.chip}>
+                  <input
+                    type="radio"
+                    name="date"
+                    value={date}
+                    checked={filters.date === date}
+                    onChange={() => update({ date })}
+                  />
+                  <span>
+                    {shortDate(date)}
+                    <small>{plural(t.meals.dateCount, result.countsByDate[date] ?? 0)}</small>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+
+        <button
+          type="button"
+          className={styles.panelToggle}
+          aria-expanded={panelOpen}
+          aria-controls={`${panelId}-panel`}
+          onClick={() => setPanelOpen((open) => !open)}
+        >
+          {t.meals.filtersTitle}
+          {secondaryCount ? <span className={styles.count}>{secondaryCount}</span> : null}
+          <Icon name={panelOpen ? "minus" : "plus"} />
+        </button>
+
+        <div id={`${panelId}-panel`} className={styles.panel} data-open={panelOpen}>
+          <fieldset className={styles.group}>
+            <legend className={styles.label}>{t.meals.dietary}</legend>
+            {DIETARY_TAGS.map((tag) => (
+              <label key={tag} className={styles.check}>
+                <input
+                  type="checkbox"
+                  name="diet"
+                  value={tag}
+                  checked={filters.diet.includes(tag)}
+                  onChange={(event) =>
+                    update({
+                      diet: event.target.checked
+                        ? [...filters.diet, tag]
+                        : filters.diet.filter((d): d is DietaryTag => d !== tag),
+                    })
+                  }
+                />
+                {t.food.dietary[tag]}
+              </label>
+            ))}
+            <p className={styles.note} id={`${panelId}-diet-note`}>
+              {t.meals.dietaryNote}
+            </p>
+          </fieldset>
+
+          <fieldset className={styles.group}>
+            <legend className={styles.label}>{t.meals.price}</legend>
+            <label className={styles.check}>
+              <input
+                type="radio"
+                name="maxPrice"
+                value=""
+                checked={filters.maxPriceCents === null}
+                onChange={() => update({ maxPriceCents: null })}
+              />
+              {t.meals.anyPrice}
+            </label>
+            {PRICE_FILTER_OPTIONS.map((cents) => (
+              <label key={cents} className={styles.check}>
+                <input
+                  type="radio"
+                  name="maxPrice"
+                  value={cents}
+                  checked={filters.maxPriceCents === cents}
+                  onChange={() => update({ maxPriceCents: cents })}
+                />
+                {format(t.meals.upTo, { price: money(eur(cents)) })}
+              </label>
+            ))}
+          </fieldset>
+        </div>
+
+        {active ? (
+          <button type="button" className={buttonClass({ variant: "quiet", size: "sm" })} onClick={resetFilters}>
+            {t.meals.reset}
+          </button>
+        ) : null}
+      </section>
+
+      <section className={styles.results} aria-labelledby={`${panelId}-results`}>
+        <h2 id={`${panelId}-results`} className="visually-hidden">
+          {t.meals.gridLabel}
+        </h2>
+        <p className={styles.resultCount} role="status">
+          {plural(t.meals.results, result.cards.length)}
+        </p>
+
+        {!browsingPilot && result.neighborhood ? (
+          <div className={styles.empty}>
+            <Icon name="pin" className={styles.emptyIcon} />
+            <h3>{format(t.meals.notYetTitle, { name: result.neighborhood.name })}</h3>
+            <p>{t.meals.notYetText}</p>
+            <div className={styles.emptyActions}>
+              <Link href={href("/waitlist")} className={buttonClass()}>
+                {t.meals.notYetCta}
+              </Link>
+              {pilot ? (
+                <button type="button" className={buttonClass({ variant: "secondary" })} onClick={resetFilters}>
+                  {format(t.meals.backToPilot, { name: pilot.name })}
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : result.cards.length === 0 ? (
+          <div className={styles.empty}>
+            <Icon name="search" className={styles.emptyIcon} />
+            <h3>{t.meals.noResultsTitle}</h3>
+            <p>{t.meals.noResultsText}</p>
+            <button type="button" className={buttonClass({ variant: "secondary" })} onClick={resetFilters}>
+              {t.meals.reset}
+            </button>
+          </div>
+        ) : (
+          <ul className={gridStyles.grid}>
+            {result.cards.map((card, index) => (
+              <li key={card.offeringId}>
+                <MealCard card={card} priority={index < 2} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}

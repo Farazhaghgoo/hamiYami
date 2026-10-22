@@ -1,0 +1,61 @@
+.stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  overflow: hidden;
+}
+
+.stepper:has([aria-invalid="true"]) {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  min-height: var(--control-h);
+  border: 0;
+  background: transparent;
+  color: var(--color-charcoal);
+  cursor: pointer;
+}
+
+.step:hover:not([aria-disabled="true"]) {
+  background: var(--color-peach);
+}
+
+.step[aria-disabled="true"] {
+  color: var(--color-line-strong);
+  cursor: not-allowed;
+}
+
+.step:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.input {
+  width: 3.5em;
+  border: 0;
+  border-inline: 1px solid var(--color-line);
+  background: transparent;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}

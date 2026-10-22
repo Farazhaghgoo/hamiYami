@@ -1,0 +1,25 @@
+.header {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 760px;
+  padding-block: var(--space-6) var(--space-5);
+}
+
+.eyebrow {
+  justify-self: start;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-green-soft);
+  color: var(--color-green-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.title {
+  font-size: var(--text-3xl);
+}
+
+.lead {
+  color: var(--color-ink-muted);
+  font-size: var(--text-lg);
+}
