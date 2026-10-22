@@ -2,6 +2,7 @@
   "name": "hamiyami",
   "version": "0.2.0",
   "private": true,
+  "type": "module",
   "description": "HamiYami marketplace demo: meals cooked nearby, reserved ahead, picked up in the neighborhood",
   "scripts": {
     "dev": "next dev",
