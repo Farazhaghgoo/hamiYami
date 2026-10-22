@@ -160,7 +160,7 @@ export async function discoverMeals(
 }
 
 /** A few upcoming meals for the homepage, preferring dishes with photos and open availability. */
-export async function featuredMeals(catalog: CatalogRepository, window: MenuWindow, now: Date, limit = 4) {
+export async function featuredMeals(catalog: CatalogRepository, window: MenuWindow, now: Date, limit = 3) {
   const snapshots = await catalog.listOfferings({ from: window.from, to: window.to });
   const cards = await buildMealCards(catalog, snapshots, now);
   const seen = new Set<string>();

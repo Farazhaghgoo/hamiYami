@@ -10,7 +10,7 @@ import gridStyles from "./MealGrid.module.css";
 export function FeaturedMeals({ menu, initial }: { menu: MenuWindow; initial: MealCardView[] }) {
   const { data: cards } = useDemoQuery("featured", (repos, now) => featuredMeals(repos.catalog, menu, now), initial);
   return (
-    <ul className={gridStyles.grid}>
+    <ul className={`${gridStyles.grid} ${gridStyles.featured}`}>
       {cards.map((card) => (
         <li key={card.offeringId}>
           <MealCard card={card} />

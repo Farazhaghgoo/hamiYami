@@ -74,6 +74,21 @@
   font-size: var(--text-xl);
 }
 
+/* Phones: keep the status to its three essentials so the menu starts sooner. */
+@media (max-width: 599.98px) {
+  .hero {
+    padding-block: var(--space-5);
+  }
+
+  .status {
+    padding: var(--space-4);
+  }
+
+  .statusText {
+    display: none;
+  }
+}
+
 .statusList {
   display: grid;
   gap: var(--space-2);

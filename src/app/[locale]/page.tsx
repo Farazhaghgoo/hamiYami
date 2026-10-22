@@ -52,7 +52,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <h2 id="status-title" className={styles.statusTitle}>
               {t.home.statusTitle}
             </h2>
-            <p>{t.home.statusText}</p>
+            <p className={styles.statusText}>{t.home.statusText}</p>
             <ul className={styles.statusList}>
               {t.home.statusPoints.map((point) => (
                 <li key={point}>

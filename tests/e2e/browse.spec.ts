@@ -31,6 +31,7 @@ test.describe("browsing", () => {
 
     await page.getByRole("checkbox", { name: "Vegano" }).check();
     await expect(page).toHaveURL(/diet=vegan/);
+    await expect(results).toHaveText("4 pasti trovati");
     const vegan = page.locator("article");
     const count = await vegan.count();
     expect(count).toBeGreaterThan(0);
@@ -42,7 +43,7 @@ test.describe("browsing", () => {
       expect(Number(price.replace(/[^\d,]/g, "").replace(",", "."))).toBeLessThanOrEqual(7);
     }
 
-    await page.getByRole("combobox", { name: "Quartiere" }).selectOption({ label: "Rione Melograno (non ancora disponibile)" });
+    await page.getByRole("combobox", { name: "Quartiere" }).selectOption({ label: "Rione Melograno (non ancora attivo)" });
     await expect(page.getByRole("heading", { name: "HamiYami non è ancora disponibile a Rione Melograno" })).toBeVisible();
     await page.getByRole("button", { name: "Torna a Borgo Lavanda" }).click();
     await expect(results).toHaveText("10 pasti trovati");

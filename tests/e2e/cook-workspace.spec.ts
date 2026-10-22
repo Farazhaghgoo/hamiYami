@@ -67,6 +67,8 @@ test.describe("cook workspace (simulation)", () => {
 
   test("confirms a sample reservation and moves focus to the outcome", async ({ page }) => {
     await page.goto("/it/cook-workspace#reservations");
+    // The workspace renders from browser storage, so wait for it before counting.
+    await expect(page.getByRole("button", { name: /^Conferma\s?:/ }).first()).toBeVisible();
     const before = await page.getByRole("button", { name: /^Conferma\s?:/ }).count();
     expect(before).toBeGreaterThan(0);
     await page.getByRole("button", { name: /^Conferma\s?:/ }).first().click();
