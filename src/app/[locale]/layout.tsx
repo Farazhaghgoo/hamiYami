@@ -11,10 +11,24 @@ import { figtree, fraunces } from "../fonts";
 import "@/shared/styles/globals.css";
 
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
-  const { t } = await getI18n(params);
+  const { t, locale } = await getI18n(params);
+  // Social previews need absolute URLs, so they are added only once the public address is known.
+  const siteUrl = process.env.SITE_URL;
   return {
     title: { default: "HamiYami — demo", template: "%s · HamiYami" },
     description: t.meta.siteDescription,
+    ...(siteUrl
+      ? {
+          metadataBase: new URL(siteUrl),
+          openGraph: {
+            type: "website",
+            siteName: "HamiYami",
+            locale: locale === "it" ? "it_IT" : "en_GB",
+            description: t.meta.siteDescription,
+            images: [{ url: "/assets/images/og-image.png", width: 1200, height: 630, alt: t.footer.tagline }],
+          },
+        }
+      : {}),
     // Prelaunch demo: keep it out of search results until the pilot checklist in README.md is done.
     robots: { index: false, follow: false },
     icons: {
