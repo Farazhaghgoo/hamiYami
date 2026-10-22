@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import { assertValidConfig } from "./src/server/env";
+
+// Fail the build (and server start) if real signup collection is switched on without everything it
+// needs. With collection off, which is the default, this never throws.
+assertValidConfig(process.env);
 
 /*
  * Static security headers for every response. The Content-Security-Policy needs a fresh nonce per
