@@ -31,17 +31,20 @@ export const localTimeSchema = z.string().regex(LOCAL_TIME, { error: "invalid_ti
 export const EARLIEST_PICKUP: LocalTime = "07:00";
 export const LATEST_PICKUP: LocalTime = "23:00";
 
+// Window rules only apply once both times are well-formed (Zod still runs refinements otherwise).
+const bothTimesValid = (w: { start: string; end: string }) => LOCAL_TIME.test(w.start) && LOCAL_TIME.test(w.end);
+
 export const pickupWindowSchema = z
   .object({ start: localTimeSchema, end: localTimeSchema })
-  .refine((w) => w.start >= EARLIEST_PICKUP && w.end <= LATEST_PICKUP, {
+  .refine((w) => !bothTimesValid(w) || (w.start >= EARLIEST_PICKUP && w.end <= LATEST_PICKUP), {
     error: "window_outside_hours",
     path: ["start"],
   })
-  .refine((w) => minutesBetween(w.start, w.end) >= 15, {
+  .refine((w) => !bothTimesValid(w) || minutesBetween(w.start, w.end) >= 15, {
     error: "window_too_short",
     path: ["end"],
   })
-  .refine((w) => minutesBetween(w.start, w.end) <= 4 * 60, {
+  .refine((w) => !bothTimesValid(w) || minutesBetween(w.start, w.end) <= 4 * 60, {
     error: "window_too_long",
     path: ["end"],
   });
