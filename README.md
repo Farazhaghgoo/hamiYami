@@ -14,6 +14,8 @@ A responsive landing page that explains HamiYami, collects interest from custome
 | 4 | **No production domain.** Canonical and `og:url`/`og:image` tags are commented out, and `noindex` is set. | `public/index.html` `<head>` | Add the real domain to those tags, then remove `<meta name="robots" content="noindex">` from `index.html` and `privacy.html`. |
 | 5 | **Marketing consent decision.** An optional, unticked "news beyond the pilot" checkbox is included and its wording/version is stored. | `public/index.html` (`#su-marketing`) | Keep it only if you'll actually send such updates, with an unsubscribe route. Otherwise delete the `field-check` block. |
 
+**Before publishing, also review:** the food-safety section (`#food-safety`) describes processes that are only *proposed*. Have it read by a qualified food-safety professional, and update it whenever a process is confirmed, changed or dropped.
+
 **Not blockers, but worth deciding:**
 - No partners/investors link is shown. One appears in the footer once `partnersContactUrl` is set to a real destination.
 - The page is in English. For an Italian pilot, consider an Italian version.
@@ -63,10 +65,24 @@ All text lives in `public/index.html`, grouped by section comments (`Hero`, `Ill
 
 Keep these when editing:
 - The "Illustrative meals and prices. These are not live listings." notice stays above the meal cards. The example dialogs say "demonstration only" and contain no order or payment controls.
-- Trust features carry the **Planned** tag until they actually exist.
+- The food-safety section must stay future-facing. See [Food-safety section](#food-safety-section).
 - Don't add ratings, testimonials, counts, partner logos, a launch city or date, or legal/licensing claims unless they are real and you hold the evidence.
 - The form's success messages are in the two `data-success` blocks. Submit-button labels are in `data-label-customer` and `data-label-cook` on the submit button.
 - Validation messages are in `main.js` and `lib/signup.js`. Keep the two in sync.
+
+### Food-safety section
+
+"Good food starts with trust." (`#food-safety`) sits after "How it works" and replaced the earlier trust section, so there is one trust section, not two. It contains four numbered cards, an accordion ("How we plan to put this into practice"), and a closing panel with both signup buttons.
+
+HamiYami is prelaunch, so every statement here describes a plan. When editing it:
+- Keep future-facing wording ("we plan to", "our proposed", "will"). Don't describe checks, records or recalls as already happening.
+- Never use: "100% safe", "guaranteed hygiene", "government-approved kitchens", "certified by HamiYami", "every meal inspected", "AI-verified food safety".
+- Don't claim that photos prove a meal is safe, or that provider agreements remove HamiYami's responsibility.
+- Don't add professional partners, insurance, approvals, inspection scores, pilot results, targets or testimonials until they are real and documented.
+- Keep the closing note: "These are planned processes, subject to professional review and pilot validation. No verification process can eliminate every food-safety risk."
+- Once a process is actually running, update its wording, and the matching FAQ answer ("How will cooks be verified?"), at the same time.
+
+The "Proposed workflow" strip (Prepare → Record checks → Label the batch → Confirm collection) is a plain ordered list. Its arrows are drawn in CSS, so screen readers hear just the four steps.
 
 Colours, fonts, spacing and radii are CSS variables at the top of `styles.css`. Text colour pairs were chosen to meet WCAG AA. Re-check contrast if you change them.
 
@@ -174,7 +190,7 @@ Nothing is installed. To connect an approved tool, set `onAnalyticsEvent` in `co
 
 | Event | Props |
 |---|---|
-| `cta_click` | `audience` (`customer`/`cook`), `location` (`header`, `nav`, `hero`, `cooks-section`, `final-cta`, `example-dialog`) |
+| `cta_click` | `audience` (`customer`/`cook`), `location` (`header`, `nav`, `menu`, `hero`, `food-safety`, `cooks-section`, `final-cta`, `example-dialog`) |
 | `form_start` | `audience` — first input in the form, once per audience |
 | `signup_complete` | `audience` — only after a confirmed successful submission |
 | `example_meal_view` | `meal` (`lasagna`, `curry`, `stuffed-vegetables`) |
@@ -195,3 +211,9 @@ Emails and free-text answers are never passed to analytics, and personal data ne
 - **Form failures:** a 404, a non-JSON 200, a network failure and server field errors each show an error and keep the answers.
 - **Accessibility basics:** skip link first in tab order, one `h1` with logical heading levels, alt text on every image, visible focus states, persistent labels, reduced-motion support, and no autoplaying media.
 - **Content:** no fake claims, contacts, ratings or launch details, and no order or payment controls.
+- **Food-safety section:**
+  - Placed after "How it works", with no duplicate trust section left.
+  - 2×2 cards from 760px and stacked on phones; no overflow at 375 or 768px.
+  - The accordion works with mouse, Enter and Space, with correct `aria-expanded`/`aria-controls` and a visible focus ring.
+  - "Join the waitlist" and "Register interest as a cook" open the form with customer and cook selected respectively.
+  - A full-page text scan found none of the banned phrases and no present-tense safety claims.
