@@ -132,10 +132,16 @@ function Flow({ detail, title, step, qty, slot }: { detail: OfferingDetailView; 
 function useStepNavigation() {
   const router = useRouter();
   const pathname = usePathname();
-  return (step: Step, quantity: number, slot: string) => {
+  const url = (step: Step, quantity: number, slot: string) => {
     const params = new URLSearchParams({ step: String(step), qty: String(quantity) });
     if (slot) params.set("slot", slot);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    return `${pathname}?${params.toString()}`;
+  };
+  return (step: Step, quantity: number, slot: string, from?: Step) => {
+    // Record the choices made on the current step in its own history entry first, so Back
+    // returns to this step with them still selected.
+    if (from) window.history.replaceState(window.history.state, "", url(from, quantity, slot));
+    router.push(url(step, quantity, slot), { scroll: false });
   };
 }
 
@@ -195,7 +201,7 @@ function QuantityStep({
           document.getElementById("reserve-qty")?.focus();
           return;
         }
-        go(2, Number(quantity), slot);
+        go(2, Number(quantity), slot, 1);
       }}
     >
       <StepHeading focus={focus}>
@@ -260,7 +266,7 @@ function SlotStep({
           document.getElementById("reserve-slot")?.focus();
           return;
         }
-        go(3, quantity, slot);
+        go(3, quantity, slot, 2);
       }}
     >
       <StepHeading focus={focus}>

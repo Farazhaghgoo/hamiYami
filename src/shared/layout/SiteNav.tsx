@@ -70,9 +70,17 @@ export function SiteNav() {
         if (open && event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
       }}
     >
-      <a className={styles.language} href={switchHref} hrefLang={otherLocale} lang={otherLocale}>
+      <a
+        className={styles.language}
+        href={switchHref}
+        hrefLang={otherLocale}
+        lang={otherLocale}
+        aria-label={t.nav.switchTo}
+      >
         <Icon name="globe" />
-        {t.nav.switchTo}
+        <span className={styles.languageLong}>{t.nav.switchTo}</span>
+        {/* Very narrow screens show the language code; the link is still named in full. */}
+        <span className={styles.languageShort}>{otherLocale.toUpperCase()}</span>
       </a>
       <button
         ref={toggleRef}
