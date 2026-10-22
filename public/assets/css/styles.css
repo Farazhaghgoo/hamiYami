@@ -33,7 +33,6 @@
   --tomato-tint: #FCEAE4;
   --green-ink: #46573F;
   --green-soft: #E5EADF;
-  --coral: #F4927E;        /* accent on charcoal: 6.7:1 */
   --ink-muted: #5E574C;    /* secondary text: 6.8:1 on cream, 5.7:1 on peach */
   --surface: #FFFDF9;
   --cream-deep: #FBF0E3;
@@ -251,18 +250,18 @@ a:hover { text-decoration-thickness: 2.5px; }
   min-height: var(--header-h);
 }
 
+/* Supplied logo (assets/brand/). Height sets the size; width follows the artwork. */
 .wordmark {
+  display: inline-flex;
+  flex: none;
   margin-right: auto;
-  color: var(--charcoal);
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1;
-  text-decoration: none;
+  border-radius: 6px;
 }
 
-.wordmark span { color: var(--tomato); }
+.wordmark img {
+  width: auto;
+  height: 46px;
+}
 
 .nav-menu {
   display: flex;
@@ -292,7 +291,7 @@ a:hover { text-decoration-thickness: 2.5px; }
 @media (max-width: 859.98px) {
   :root { --header-h: 62px; }
 
-  .wordmark { font-size: 1.45rem; }
+  .wordmark img { height: 40px; }
 
   .js .header-inner { flex-wrap: nowrap; }
 
@@ -370,7 +369,9 @@ a:hover { text-decoration-thickness: 2.5px; }
   .js .nav-menu-cta .btn { width: 100%; min-height: 50px; font-size: 1.0625rem; }
 }
 
-@media (max-width: 419.98px) {
+.header-cta { white-space: nowrap; }
+
+@media (max-width: 479.98px) {
   .js .header-cta { display: none; }
 }
 
@@ -1283,8 +1284,7 @@ input[type="checkbox"] {
   }
 }
 
-.wordmark-light { color: var(--cream); }
-.wordmark-light span { color: var(--coral); }
+.site-footer .wordmark img { height: 52px; }
 
 .footer-brand p {
   margin-top: 10px;
