@@ -1,0 +1,14 @@
+{
+  "name": "hamiyami-landing",
+  "private": true,
+  "description": "HamiYami prelaunch landing page",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "test": "node --test",
+    "og-image": "node scripts/render-og-image.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
