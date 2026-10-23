@@ -11,6 +11,7 @@ import { Icon } from "@/shared/ui/Icon";
 import { Notice } from "@/shared/ui/Notice";
 import { reservationTiming } from "../views";
 import { CancelReservation } from "./CancelReservation";
+import { PickupPass } from "./PickupPass";
 import { StatusBadge } from "./StatusBadge";
 import styles from "./Reservations.module.css";
 
@@ -80,6 +81,8 @@ export function ReservationDetail({ reservationId, isNew }: { reservationId: str
         ) : null}
       </div>
 
+      {timing.upcoming ? <PickupPass reservation={reservation} /> : null}
+
       <section className={styles.panel} aria-labelledby="summary-title">
         <h2 id="summary-title" className={styles.panelTitle}>
           {title}
@@ -124,10 +127,6 @@ export function ReservationDetail({ reservationId, isNew }: { reservationId: str
             <dd>
               <strong>{money(reservation.total)}</strong>
             </dd>
-          </div>
-          <div>
-            <dt>{t.reservation.reference}</dt>
-            <dd className={styles.reference}>{reservation.id.replace("local_reservation_", "").slice(0, 8).toUpperCase()}</dd>
           </div>
         </dl>
 

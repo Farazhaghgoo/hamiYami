@@ -22,6 +22,35 @@ test.describe("simulated reservation", () => {
     expect((await storedDemo(page))?.reservations[0]?.status).toBe("cancelled_by_customer");
   });
 
+  test("gives a pickup code and a calendar file made in the browser", async ({ page }) => {
+    const requests: string[] = [];
+    page.on("request", (request) => requests.push(request.url()));
+    await openReservableMeal(page);
+    await reserveCurrentMeal(page, { quantity: 2 });
+
+    const pass = page.getByRole("region", { name: "Codice di ritiro" });
+    const code = (await pass.locator("p").first().innerText()).trim();
+    expect(code).toMatch(/^[BCDFGHJKMNPQRSTVWXYZ2-9]{4}$/);
+
+    const link = pass.getByRole("link", { name: "Aggiungi al calendario" });
+    const href = (await link.getAttribute("href")) ?? "";
+    expect(href.startsWith("data:text/calendar;charset=utf-8,")).toBe(true);
+    const ics = decodeURIComponent(href.slice(href.indexOf(",") + 1)).replace(/\r\n /g, "");
+    expect(ics).toContain("BEGIN:VEVENT");
+    expect(ics).toMatch(/DTSTART:\d{8}T\d{6}Z/);
+    expect(ics).toContain(`Codice di ritiro: ${code}`);
+    expect(ics).toContain("SUMMARY:Ritiro HamiYami (demo)");
+
+    // The browser really downloads it, and making it contacted nothing.
+    const before = requests.length;
+    const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+    expect(download.suggestedFilename()).toMatch(/^hamiyami-pickup-\d{4}-\d{2}-\d{2}\.ics$/);
+    expect(requests.slice(before).filter((url) => !url.startsWith("data:"))).toEqual([]);
+
+    await page.goto("/it/reservations");
+    await expect(page.getByText(`Codice ${code}`)).toBeVisible();
+  });
+
   test("never asks for payment or personal details and says so plainly", async ({ page }) => {
     await openReservableMeal(page);
     await page.getByRole("button", { name: "Prenota (simulazione)" }).click();

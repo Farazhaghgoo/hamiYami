@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useDemoQuery } from "@/data/demo/DemoProvider";
 import { pickText } from "@/domain/localized";
+import { pickupCodeFor } from "@/domain/pickup-code";
 import type { Reservation } from "@/domain/reservation";
 import { useI18n } from "@/i18n/I18nProvider";
 import { buttonClass } from "@/shared/ui/button";
@@ -101,6 +102,7 @@ function ReservationCard({
         <p className={styles.meta}>
           {format(t.reserve.whenValue, { date: shortDate(reservation.pickup.date), slot: reservation.pickup.slot })} ·{" "}
           {plural(t.common.portions, reservation.quantity)} · {money(reservation.total)}
+          {timing.upcoming ? ` · ${format(t.reservation.pickupCodeInline, { code: pickupCodeFor(reservation.id) })}` : null}
         </p>
         <StatusBadge status={reservation.status} />
       </div>
