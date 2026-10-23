@@ -13,6 +13,7 @@ import {
   discoverMeals,
   EMPTY_FILTERS,
   filtersToSearchParams,
+  groupByDay,
   hasActiveFilters,
   PRICE_FILTER_OPTIONS,
   type DiscoveryFilters,
@@ -31,7 +32,7 @@ export function DiscoveryView({
   initialFilters: DiscoveryFilters;
   initialResult: DiscoveryResult;
 }) {
-  const { t, format, plural, shortDate, money, href } = useI18n();
+  const { t, format, plural, shortDate, date, money, href } = useI18n();
   const [filters, setFilters] = useState(initialFilters);
   const [panelOpen, setPanelOpen] = useState(false);
   const panelId = useId();
@@ -192,10 +193,8 @@ export function DiscoveryView({
         ) : null}
       </section>
 
-      <section className={styles.results} aria-labelledby={`${panelId}-results`}>
-        <h2 id={`${panelId}-results`} className="visually-hidden">
-          {t.meals.gridLabel}
-        </h2>
+      {/* Labelled without a heading so the day headings below can be h2 and dish titles h3. */}
+      <section className={styles.results} aria-label={t.meals.gridLabel}>
         <p className={styles.resultCount} role="status">
           {plural(t.meals.results, result.cards.length)}
         </p>
@@ -203,7 +202,7 @@ export function DiscoveryView({
         {!browsingPilot && result.neighborhood ? (
           <div className={styles.empty}>
             <Icon name="pin" className={styles.emptyIcon} />
-            <h3>{format(t.meals.notYetTitle, { name: result.neighborhood.name })}</h3>
+            <h2 className={styles.emptyTitle}>{format(t.meals.notYetTitle, { name: result.neighborhood.name })}</h2>
             <p>{t.meals.notYetText}</p>
             <div className={styles.emptyActions}>
               <Link href={href("/waitlist")} className={buttonClass()}>
@@ -219,20 +218,36 @@ export function DiscoveryView({
         ) : result.cards.length === 0 ? (
           <div className={styles.empty}>
             <Icon name="search" className={styles.emptyIcon} />
-            <h3>{t.meals.noResultsTitle}</h3>
+            <h2 className={styles.emptyTitle}>{t.meals.noResultsTitle}</h2>
             <p>{t.meals.noResultsText}</p>
             <button type="button" className={buttonClass({ variant: "secondary" })} onClick={resetFilters}>
               {t.meals.reset}
             </button>
           </div>
         ) : (
-          <ul className={gridStyles.grid}>
-            {result.cards.map((card, index) => (
-              <li key={card.offeringId}>
-                <MealCard card={card} priority={index < 2} />
-              </li>
-            ))}
-          </ul>
+          <div className={styles.days}>
+            {groupByDay(result.cards).map((group, groupIndex) => {
+              const headingId = `${panelId}-day-${group.date}`;
+              const label = date(group.date);
+              return (
+                <section key={group.date} className={styles.day} aria-labelledby={headingId}>
+                  <h2 id={headingId} className={styles.dayTitle}>
+                    {group.date === menu.dates[0] ? <span className={styles.dayRelative}>{t.meals.tomorrow}</span> : null}{" "}
+                    <span>{label.charAt(0).toUpperCase() + label.slice(1)}</span>{" "}
+                    <span className={styles.dayCount}>{plural(t.meals.dateCount, group.cards.length)}</span>
+                  </h2>
+                  <ul className={gridStyles.grid}>
+                    {group.cards.map((card, index) => (
+                      <li key={card.offeringId}>
+                        {/* The day is in the heading, so cards show only the pickup times. */}
+                        <MealCard card={card} showDate={false} priority={groupIndex === 0 && index < 2} />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
         )}
       </section>
     </div>

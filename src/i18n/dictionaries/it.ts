@@ -146,9 +146,13 @@ export const it = {
     notYetCta: "Vai alla lista d'attesa",
     backToPilot: "Torna a {name}",
     gridLabel: "Pasti disponibili",
+    tomorrow: "Domani",
   },
   card: {
     pickup: "Ritiro {date}, {start}–{end}",
+    pickupTime: "Ritiro {start}–{end}",
+    reserveByTime: "Prenota entro le {time}",
+    reserveByDateTime: "Prenota entro {date}, {time}",
     by: "di {cook}",
     available: { one: "{count} porzione disponibile", other: "{count} porzioni disponibili" },
     low: { one: "Ultima porzione", other: "Ultime {count} porzioni" },

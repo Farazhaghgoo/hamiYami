@@ -5,7 +5,7 @@ import { pickText } from "@/domain/localized";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Icon } from "@/shared/ui/Icon";
 import { MealImage } from "@/shared/ui/MealImage";
-import type { MealCardView } from "../discovery";
+import { reservationDeadline, type MealCardView } from "../discovery";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import styles from "./MealCard.module.css";
 
@@ -13,15 +13,19 @@ export function MealCard({
   card,
   headingLevel = 3,
   priority = false,
+  showDate = true,
 }: {
   card: MealCardView;
   headingLevel?: 2 | 3;
   priority?: boolean;
+  /** Leave the pickup day out when the card sits under a heading for that day. */
+  showDate?: boolean;
 }) {
   const { t, locale, format, shortDate, money, href } = useI18n();
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const title = pickText(card.meal.title, locale);
   const dimmed = !card.availability.reservable;
+  const deadline = card.availability.reservable ? reservationDeadline(card) : null;
 
   return (
     <article className={styles.card} data-dimmed={dimmed || undefined}>
@@ -42,12 +46,19 @@ export function MealCard({
         </p>
         <p className={styles.pickup}>
           <Icon name="clock" />
-          {format(t.card.pickup, {
+          {format(showDate ? t.card.pickup : t.card.pickupTime, {
             date: shortDate(card.pickupDate),
             start: card.pickupWindow.start,
             end: card.pickupWindow.end,
           })}
         </p>
+        {deadline ? (
+          <p className={styles.deadline}>
+            {deadline.sameDayAsPickup
+              ? format(t.card.reserveByTime, { time: deadline.time })
+              : format(t.card.reserveByDateTime, { date: shortDate(deadline.date), time: deadline.time })}
+          </p>
+        ) : null}
         {card.meal.dietary.length ? (
           <ul className={styles.tags} aria-label={t.detail.dietary}>
             {card.meal.dietary.map((tag) => (

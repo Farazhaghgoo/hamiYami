@@ -106,6 +106,12 @@ export function romeDateOf(instant: Date): CivilDate {
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+/** The Rome wall-clock time (HH:mm) at the given instant. */
+export function romeTimeOf(instant: Date): LocalTime {
+  const { hour, minute } = romeParts(instant);
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
 /** Rome's offset from UTC in minutes at an instant: 60 in winter, 120 in summer. */
 export function romeOffsetMinutes(instant: Date): number {
   const p = romeParts(instant);

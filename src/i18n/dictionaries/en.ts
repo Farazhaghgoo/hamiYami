@@ -141,9 +141,13 @@ export const en: Dictionary = {
     notYetCta: "Go to the waitlist",
     backToPilot: "Back to {name}",
     gridLabel: "Available meals",
+    tomorrow: "Tomorrow",
   },
   card: {
     pickup: "Pickup {date}, {start}–{end}",
+    pickupTime: "Pickup {start}–{end}",
+    reserveByTime: "Reserve by {time}",
+    reserveByDateTime: "Reserve by {date}, {time}",
     by: "by {cook}",
     available: { one: "{count} portion available", other: "{count} portions available" },
     low: { one: "Last portion", other: "Last {count} portions" },

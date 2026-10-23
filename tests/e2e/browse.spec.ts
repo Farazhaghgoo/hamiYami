@@ -49,6 +49,22 @@ test.describe("browsing", () => {
     await expect(results).toHaveText("10 pasti trovati");
   });
 
+  test("groups meals by pickup day and says when reservations close", async ({ page }) => {
+    await page.goto("/it/meals");
+    const results = page.getByRole("region", { name: "Pasti disponibili" });
+    const days = results.getByRole("heading", { level: 2 });
+    // Any seven days contain five weekdays, and the pilot menu runs on weekdays.
+    await expect(days).toHaveCount(5);
+    await expect(days.first()).toContainText(/\d+ piatt/);
+
+    // Under a day heading, cards give only the pickup times.
+    await expect(results.locator("article").first()).toContainText(/Ritiro \d{2}:\d{2}–\d{2}:\d{2}/);
+    await expect(results.locator("article", { hasText: "porzioni disponibili" }).first()).toContainText(
+      /Prenota entro (le \d{2}:\d{2}|.+, \d{2}:\d{2})/,
+    );
+    await expect(results.locator("article", { hasText: "Esaurito" }).first()).not.toContainText("Prenota entro");
+  });
+
   test("filters in the URL survive a reload", async ({ page }) => {
     await page.goto("/it/meals?diet=vegetarian&maxPrice=800");
     await expect(page.getByRole("checkbox", { name: "Vegetariano" })).toBeChecked();

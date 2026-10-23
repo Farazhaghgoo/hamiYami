@@ -5,7 +5,14 @@ import type { LocalizedText } from "@/domain/localized";
 import type { MenuWindow } from "@/domain/menu-window";
 import type { Money } from "@/domain/money";
 import { computeAvailability, type Availability } from "@/domain/offering";
-import { civilDateSchema, type CivilDate, type PickupWindow } from "@/domain/time";
+import {
+  civilDateSchema,
+  romeDateOf,
+  romeTimeOf,
+  type CivilDate,
+  type LocalTime,
+  type PickupWindow,
+} from "@/domain/time";
 
 /** Everything a meal card shows, already joined and ready to render. */
 export interface MealCardView {
@@ -157,6 +164,38 @@ export async function discoverMeals(
   );
 
   return { neighborhoods, neighborhood, countsByDate, cards };
+}
+
+export interface DayGroup {
+  date: CivilDate;
+  cards: MealCardView[];
+}
+
+/** Groups cards by pickup day, keeping their order (days in date order, dishes by pickup time). */
+export function groupByDay(cards: MealCardView[]): DayGroup[] {
+  const groups: DayGroup[] = [];
+  for (const card of [...cards].sort(
+    (a, b) => a.pickupDate.localeCompare(b.pickupDate) || a.pickupWindow.start.localeCompare(b.pickupWindow.start),
+  )) {
+    const last = groups[groups.length - 1];
+    if (last && last.date === card.pickupDate) last.cards.push(card);
+    else groups.push({ date: card.pickupDate, cards: [card] });
+  }
+  return groups;
+}
+
+export interface ReservationDeadline {
+  date: CivilDate;
+  time: LocalTime;
+  /** True when reservations close on the pickup day itself, so the day can be left out. */
+  sameDayAsPickup: boolean;
+}
+
+/** When reservations close, in Rome time, for showing on a card. */
+export function reservationDeadline(card: Pick<MealCardView, "availability" | "pickupDate">): ReservationDeadline {
+  const cutoff = new Date(card.availability.cutoff);
+  const date = romeDateOf(cutoff);
+  return { date, time: romeTimeOf(cutoff), sameDayAsPickup: date === card.pickupDate };
 }
 
 /** A few upcoming meals for the homepage, preferring dishes with photos and open availability. */

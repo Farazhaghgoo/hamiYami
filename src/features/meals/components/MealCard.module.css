@@ -73,6 +73,13 @@
   font-weight: 600;
 }
 
+.deadline {
+  margin-top: -2px;
+  padding-left: calc(1.25em + 6px);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;

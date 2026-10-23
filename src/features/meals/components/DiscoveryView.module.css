@@ -223,3 +223,46 @@
   flex-wrap: wrap;
   gap: var(--space-3);
 }
+
+.emptyTitle {
+  font-size: var(--text-xl);
+}
+
+.days {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.day {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.dayTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--text-xl);
+}
+
+.dayRelative {
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-tomato-tint);
+  color: var(--color-tomato-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.dayCount {
+  color: var(--color-ink-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+}
