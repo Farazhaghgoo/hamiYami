@@ -35,11 +35,23 @@ const DemoContext = createContext<DemoContextValue | null>(null);
 
 const noopSubscribe = () => () => {};
 
+const serverStore = createStaticDemoStore();
+let browserStore: DemoStore | null = null;
+
+/**
+ * One store per page load, created outside React state. Reading storage has side effects (unreadable
+ * data is removed and reported), and React may discard a render attempt during hydration and run
+ * state initializers again; a second store would find storage already cleaned and lose the report.
+ */
+function getDemoStore(): DemoStore {
+  if (typeof window === "undefined") return serverStore;
+  browserStore ??= createBrowserDemoStore();
+  return browserStore;
+}
+
 export function DemoProvider({ anchor, children }: { anchor: CivilDate; children: ReactNode }) {
-  // One store per page load. Server rendering uses an empty, read-only store.
-  const [store] = useState<DemoStore>(() =>
-    typeof window === "undefined" ? createStaticDemoStore() : createBrowserDemoStore(),
-  );
+  // Server rendering uses an empty, read-only store.
+  const store = getDemoStore();
   const isClient = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const state = useSyncExternalStore(store.subscribe, store.getState, () => EMPTY_DEMO_STATE);
   const issue = useSyncExternalStore(store.subscribe, store.getIssue, () => null);
