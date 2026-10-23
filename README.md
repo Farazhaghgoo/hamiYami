@@ -31,12 +31,12 @@ HamiYami is a planned marketplace for meals prepared by neighborhood cooks in It
 | Journey | Where | What it demonstrates |
 |---|---|---|
 | Homepage | `/it` | The dinner use case, prelaunch status, this week's meals, how it would work, a short trust summary, the cook journey |
-| Meal discovery | `/it/meals` | Weekly menu for the pilot neighborhood; day, neighborhood, dietary-preference and price filters (kept in the URL); empty states; fictional availability |
+| Meal discovery | `/it/meals` | Weekly menu for the pilot neighborhood, grouped by pickup day; each card says when reservations close (Rome time); day, neighborhood, dietary-preference and price filters (kept in the URL); empty states; fictional availability |
 | Meal details | `/it/meals/{offering}` | Photo or neutral placeholder, portion, ingredients, declared allergens and possible cross-contact (kept apart from dietary preferences), cook, pickup window and area, quantity, sold-out and closed states |
 | Simulated reservation | `/it/meals/{offering}/reserve` | Portions → pickup time → review → demo confirmation. No payment, no account, no personal details. Double-submit and Back-button safe |
-| My reservations | `/it/reservations` | View and cancel simulated reservations until the cut-off |
+| My reservations | `/it/reservations` | View and cancel simulated reservations until the cut-off; each upcoming one has a pickup code and an "Add to calendar" (.ics) link built in the browser |
 | Cook profile | `/it/cooks/{cook}` | Clearly fictional profile, cooking style, sample menu, upcoming demo dates, and *no* verification claims, ratings or testimonials |
-| Cook workspace | `/it/cook-workspace` | A labelled **simulation** of a fictional cook's tools: create and edit dishes and dates, publish/unpublish, see and confirm/decline sample reservations |
+| Cook workspace | `/it/cook-workspace` | A labelled **simulation** of a fictional cook's tools. It opens on a day-by-day **prep view** (portions to cook, requests to confirm, still free, and the pickup list with codes, where reservations are confirmed or declined), then dates (publish/unpublish, edit) and dishes (create, edit) |
 | Become a cook / Waitlist | `/it/become-a-cook`, `/it/waitlist` | Interest form with shared validation; while collection is off it says plainly that nothing was sent |
 | Trust | `/it/trust` | The *planned* food-safety approach, future-facing only |
 | About the demo, Privacy | `/it/demo`, `/it/privacy` | What is and isn't real; the privacy notice placeholder |
@@ -86,6 +86,8 @@ or download Playwright's own once with `npx playwright install chromium`. Set `E
 - **Safe parsing and versioning.** Stored data is validated with Zod on every load (`demo-state.ts`). Unreadable or tampered data, or data from another schema version, is discarded and the visitor sees a notice. Size limits cap stored lists. If storage is blocked, the demo keeps working in memory and says so.
 - **Reset.** "Azzera la demo / Reset the demo" in the top banner (and on `/demo`) asks for confirmation and clears everything stored.
 - **Checkout attempts** keep a random idempotency key in `sessionStorage` (no personal data), so double clicks, reloads or going Back and confirming the same choice never create a second reservation.
+- **Pickup codes** are derived from the reservation id (`domain/pickup-code.ts`), so they need no stored field: consonants and digits only, never a word. The customer's page and the cook's pickup list show the same code.
+- **Calendar files** are built in the browser as a `data:` link (`features/reservations/calendar.ts`): RFC 5545, UTC times, a one-hour reminder. Downloading one sends nothing anywhere.
 - **No personal data** is requested or stored by the demo. Discovery filters in the URL are non-personal.
 
 ## Application structure
@@ -97,7 +99,7 @@ src/
   app/[locale]/           routes (server components); layout adds providers, banner, header, footer
   app/api/waitlist/       POST /api/waitlist (real collection only when fully configured)
   proxy.ts                locale redirect + per-request nonce Content-Security-Policy
-  domain/                 types, Zod schemas and rules: money, Rome time, catalog, offering, reservation
+  domain/                 types, Zod schemas and rules: money, Rome time, catalog, offering, reservation, pickup code
   data/
     contracts.ts          data-access interfaces used by everything above
     fixtures/             fictional catalog and weekly menu (imported only inside src/data)
@@ -106,8 +108,8 @@ src/
   features/
     meals/                discovery and detail queries + components (cards, filters, detail)
     cooks/                cook profile query + components
-    reservations/         reservation flow, list, detail, idempotency attempt keys
-    cook-workspace/       form schemas, editors, workspace view
+    reservations/         reservation flow, list, detail, pickup pass, calendar export, idempotency attempt keys
+    cook-workspace/       form schemas, prep plan, editors, workspace view
     waitlist/             shared schema, approved consent registry, form
   server/                 server-only: env validation, CSP builder, waitlist handler/store/rate limit
   i18n/                   locales, dictionaries (it = shape, en typed against it), formatting helpers
@@ -188,7 +190,7 @@ The contracts in `src/data/contracts.ts` are the seam: screens and application f
    - cook status changes (confirm, decline, collected) only for their own offerings, following the transition rules in `domain/reservation.ts`;
    - administrative actions (onboarding checks, suspending sales, recalls) restricted to an admin role and audited;
    - with Supabase, enforce this with Row Level Security policies as well as in the server code.
-5. **Atomic inventory and idempotency.** Creating a reservation must check capacity and insert in one transaction, e.g. a conditional update (`update offerings set reserved = reserved + :q where id = :id and reserved + :q <= capacity and status = 'published' and now() < cutoff`) or row locking, plus a unique idempotency key that returns the existing reservation on retry. The browser-side checks in the demo are not sufficient under concurrency.
+5. **Atomic inventory and idempotency.** Creating a reservation must check capacity and insert in one transaction, e.g. a conditional update (`update offerings set reserved = reserved + :q where id = :id and reserved + :q <= capacity and status = 'published' and now() < cutoff`) or row locking, plus a unique idempotency key that returns the existing reservation on retry. The browser-side checks in the demo are not sufficient under concurrency. Generate the **pickup code** on the server at the same time, unique among the reservations for that offering (the demo derives it from the id).
 6. **Remove the demo overlay** (`src/data/demo/`, `DemoProvider`, `useDemoQuery`) once real data flows from the server, or keep it behind a "demo mode" flag. Client components then refresh with server data (e.g. `router.refresh()` after a Server Action) instead of browser storage.
 7. **Payments** (if and when chosen): a provider's hosted checkout, webhooks verified on the server, and reservations confirmed only after payment confirmation.
 8. **Images:** a storage bucket with upload validation (type, size, dimensions), moderation, and rights confirmation from cooks.
@@ -255,13 +257,13 @@ The photos are generic stock, hands-only, not presented as HamiYami cooks or cus
 
 ## Verification
 
-Run on 23 October 2026, Windows 11, Node 24.20, Chrome stable:
+Last run on 23 October 2026, Windows 11, Node 24.20, Chrome stable:
 
 - `npm run typecheck`: pass (strict TypeScript, route types generated).
 - `npm run lint`: pass, no warnings.
-- `npm test`: 89 unit tests pass (domain time/DST, money, capacity, reservation transitions, demo storage parsing and versioning, demo repositories including idempotency, isolation and reset, cook forms, waitlist schema/handler/config/store, translations, CSP, URL filters).
+- `npm test`: 104 unit tests pass (domain time/DST, money, capacity, reservation transitions, demo storage parsing and versioning, demo repositories including idempotency, isolation and reset, day grouping and cut-off display, pickup codes, calendar files (UTC times across the clock change, escaping, 75-octet folding), the cook prep plan, cook forms, waitlist schema/handler/config/store, translations, CSP, URL filters).
 - `npm run build`: pass. With `WAITLIST_COLLECTION_ENABLED=true` and nothing else set, the build fails with the expected list of missing settings.
-- `npm run test:e2e` (`PLAYWRIGHT_CHANNEL=chrome`): 38 browser tests pass on desktop and mobile emulation. They cover browsing and filters, meal details, sold-out and quantity rules, reservation completion, cancellation, duplicate submission and Back/Forward, the cook workspace, per-visitor isolation, reset, corrupted and outdated storage, language switching, keyboard-only reservation, skip link and focus, disabled waitlist (asserts no request is made), the API refusing to store, security headers, no CSP violations, no third-party requests, and no horizontal overflow at 320/375/768px.
+- `npm run test:e2e` (`PLAYWRIGHT_CHANNEL=chrome`): 41 browser tests pass on desktop and mobile emulation. They cover browsing, day grouping and filters, meal details, sold-out and quantity rules, reservation completion, cancellation, duplicate submission and Back/Forward, the pickup code and a real .ics download (with no request made), the cook workspace and prep view (including a customer's reservation reaching the same visitor's pickup list with the same code, and the cook's decision showing on the customer's page), per-visitor isolation, reset, corrupted and outdated storage, language switching, keyboard-only reservation, skip link and focus, disabled waitlist (asserts no request is made), the API refusing to store, security headers, no CSP violations, no third-party requests, and no horizontal overflow at 320/375/768px.
 - Manual review of the rendered pages at desktop, tablet and phone widths. Screenshots are in `docs/screenshots/`.
 
 Not verified: screen-reader output with real assistive technology (only the accessibility tree was inspected); Safari and Firefox; a real Supabase project or deployed hosting (no external services were contacted); the hosted Vercel environment's own header handling.
@@ -271,6 +273,7 @@ Not verified: screen-reader output with real assistive technology (only the acce
 - **Every page renders dynamically**, because a nonce-based CSP needs a fresh nonce per request. This costs server time and prevents CDN caching. Next.js's experimental SRI (hash-based CSP) could allow static pages later.
 - Demo data is per browser: it doesn't follow a visitor across devices, and two tabs editing at the same instant can race (last write wins). Real inventory is not shared, by design.
 - The cook workspace always simulates the one fictional cook "Marta". Text a cook types is shown as written in both languages.
+- Pickup codes are derived from reservation ids, so two reservations could in theory share one (about 1 in 600,000 per pair); a real service must generate unique codes on the server.
 - Native date and time inputs follow the browser's own language and format.
 - No photo upload; cook-created dishes always show the placeholder.
 - Real waitlist collection has been tested only against a mocked Supabase API.
