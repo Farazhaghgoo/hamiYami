@@ -65,14 +65,52 @@ test.describe("cook workspace (simulation)", () => {
     await expect(page.getByText(/porzioni prenotate: non puoi prevederne di meno/).first()).toBeVisible();
   });
 
-  test("confirms a sample reservation and moves focus to the outcome", async ({ page }) => {
-    await page.goto("/it/cook-workspace#reservations");
-    // The workspace renders from browser storage, so wait for it before counting.
-    await expect(page.getByRole("button", { name: /^Conferma\s?:/ }).first()).toBeVisible();
-    const before = await page.getByRole("button", { name: /^Conferma\s?:/ }).count();
-    expect(before).toBeGreaterThan(0);
-    await page.getByRole("button", { name: /^Conferma\s?:/ }).first().click();
+  test("plans each day: portions to cook, requests to confirm, and the pickup list", async ({ page }) => {
+    await page.goto("/it/cook-workspace#prep");
+    const prep = page.getByRole("region", { name: "Da preparare" });
+    // The workspace renders from browser storage, so wait for it before reading numbers.
+    const firstDay = prep.getByRole("region").first();
+    await expect(firstDay).toContainText(/\d+ porzion[ei] da preparare/);
+    await expect(prep.getByRole("heading", { level: 4 }).first()).toBeVisible();
+    await expect(prep.getByText(/^Codice [BCDFGHJKMNPQRSTVWXYZ2-9]{4}$/).first()).toBeVisible();
+
+    const confirm = prep.getByRole("button", { name: /^Conferma\s?:/ });
+    await expect(confirm.first()).toBeVisible();
+    const before = await confirm.count();
+    const pending = Number((await firstDay.getByText(/richiest[ae] da confermare/).innerText()).match(/\d+/)?.[0] ?? 0);
+    await firstDay.getByRole("button", { name: /^Conferma\s?:/ }).first().click();
+
+    // The button disappears, so focus moves to the outcome; the numbers follow the decision.
     await expect(page.locator(":focus")).toContainText("Stato aggiornato: Confermata dal cuoco");
-    await expect(page.getByRole("button", { name: /^Conferma\s?:/ })).toHaveCount(before - 1);
+    await expect(confirm).toHaveCount(before - 1);
+    if (pending > 1) await expect(firstDay).toContainText(`${pending - 1} richiest`);
+    else await expect(firstDay).not.toContainText(/richiest[ae] da confermare/);
+  });
+
+  test("a customer's simulated reservation reaches the same visitor's cook view, with the same code", async ({ page }) => {
+    // Reserve Marta's lasagna as a customer.
+    await page.goto("/it/meals");
+    const card = page.locator("article", { hasText: "Lasagna al ragù" }).filter({ hasText: "porzioni disponibili" }).first();
+    const href = await card.locator("h3 a").getAttribute("href");
+    await page.goto(`${href}/reserve?step=3&qty=1&slot=19:15`);
+    await page.getByRole("button", { name: "Conferma la prenotazione demo" }).click();
+    await expect(page.getByRole("heading", { name: "Prenotazione demo registrata" })).toBeVisible();
+    const code = (await page.getByRole("region", { name: "Codice di ritiro" }).locator("p").first().innerText()).trim();
+    const reservationUrl = page.url();
+
+    // As the cook, find it in the pickup list by its code and confirm it.
+    await page.goto("/it/cook-workspace#prep");
+    const row = page
+      .getByRole("list", { name: /^Ritiri per Lasagna al ragù/ })
+      .getByRole("listitem")
+      .filter({ hasText: `Codice ${code}` });
+    await expect(row).toContainText("Fatta da te in questa demo");
+    await expect(row).toContainText("19:15");
+    await row.getByRole("button", { name: /^Conferma\s?:/ }).click();
+    await expect(row).toContainText("Confermata dal cuoco (simulata)");
+
+    // Back as the customer, the decision shows on the reservation.
+    await page.goto(reservationUrl.replace("?new=1", ""));
+    await expect(page.getByText("Confermata dal cuoco (simulata)")).toBeVisible();
   });
 });

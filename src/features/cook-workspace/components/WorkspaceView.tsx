@@ -6,16 +6,16 @@ import { useEffect, useRef, useState } from "react";
 import type { OfferingSnapshot } from "@/data/contracts";
 import { useDemo, useDemoQuery } from "@/data/demo/DemoProvider";
 import type { Meal } from "@/domain/catalog";
-import { isLocalId } from "@/domain/ids";
 import { pickText } from "@/domain/localized";
 import { schedulableRange } from "@/domain/menu-window";
-import { allowedTransitions, type Reservation, type ReservationStatus } from "@/domain/reservation";
-import { StatusBadge } from "@/features/reservations/components/StatusBadge";
+import type { Reservation, ReservationStatus } from "@/domain/reservation";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Badge } from "@/shared/ui/Badge";
 import { buttonClass } from "@/shared/ui/button";
 import { Icon } from "@/shared/ui/Icon";
 import { Notice } from "@/shared/ui/Notice";
+import { buildPrepPlan } from "../prep";
+import { PrepView } from "./PrepView";
 import styles from "./Workspace.module.css";
 
 interface WorkspaceData {
@@ -57,6 +57,9 @@ export function WorkspaceView() {
     if (message?.focus) messageRef.current?.focus();
   }, [message]);
 
+  const prepDays = buildPrepPlan(data.offerings, data.meals, data.reservations);
+  const portionsToPrepare = prepDays.reduce((total, day) => total + day.toPrepare, 0);
+
   const mealTitle = (mealId: string) => {
     const meal = data.meals.find((m) => m.id === mealId);
     return meal ? pickText(meal.title, locale) : mealId;
@@ -84,14 +87,14 @@ export function WorkspaceView() {
   return (
     <div className={styles.workspace}>
       <nav aria-label={t.workspace.navLabel} className={styles.sectionNav}>
+        <a href="#prep">
+          {t.workspace.tabs.prep} <span>{portionsToPrepare}</span>
+        </a>
         <a href="#offerings">
           {t.workspace.tabs.offerings} <span>{data.offerings.length}</span>
         </a>
         <a href="#meals">
           {t.workspace.tabs.meals} <span>{data.meals.length}</span>
-        </a>
-        <a href="#reservations">
-          {t.workspace.tabs.reservations} <span>{data.reservations.length}</span>
         </a>
       </nav>
 
@@ -104,6 +107,18 @@ export function WorkspaceView() {
       </div>
 
       {!ready ? <p className={styles.muted}>{t.common.loading}</p> : null}
+
+      <section id="prep" aria-labelledby="prep-title" className={styles.section}>
+        <div className={styles.sectionHead}>
+          <h2 id="prep-title">{t.workspace.prepTitle}</h2>
+        </div>
+        <p className={styles.muted}>
+          {t.workspace.prepLead} {t.workspace.reservationsNote}
+        </p>
+        {ready ? (
+          <PrepView days={prepDays} tomorrow={range.min} onTransition={(reservation, to) => transition(reservation, to)} />
+        ) : null}
+      </section>
 
       <section id="offerings" aria-labelledby="offerings-title" className={styles.section}>
         <div className={styles.sectionHead}>
@@ -169,22 +184,6 @@ export function WorkspaceView() {
         </ul>
       </section>
 
-      <section id="reservations" aria-labelledby="reservations-title" className={styles.section}>
-        <div className={styles.sectionHead}>
-          <h2 id="reservations-title">{t.workspace.reservationsTitle}</h2>
-        </div>
-        <p className={styles.muted}>{t.workspace.reservationsNote}</p>
-        {ready && data.reservations.length === 0 ? <p className={styles.empty}>{t.workspace.noReservations}</p> : null}
-        <ul className={styles.rows}>
-          {data.reservations.map((reservation) => (
-            <ReservationRow
-              key={reservation.id}
-              reservation={reservation}
-              onTransition={(to) => transition(reservation, to)}
-            />
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }
@@ -223,60 +222,6 @@ function OfferingRow({ snapshot, title, onToggle }: { snapshot: OfferingSnapshot
           </Link>
         ) : null}
       </div>
-    </li>
-  );
-}
-
-const COOK_ACTIONS: Partial<Record<ReservationStatus, "confirm" | "decline" | "markCollected" | "markNotCollected">> = {
-  confirmed: "confirm",
-  declined_by_cook: "decline",
-  collected: "markCollected",
-  not_collected: "markNotCollected",
-};
-
-function ReservationRow({
-  reservation,
-  onTransition,
-}: {
-  reservation: Reservation;
-  onTransition: (to: ReservationStatus) => void;
-}) {
-  const { t, locale, format, shortDate, plural } = useI18n();
-  const actions = allowedTransitions(reservation, "cook", new Date());
-  const title = pickText(reservation.mealTitle, locale);
-  return (
-    <li className={styles.row}>
-      <div className={styles.rowMain}>
-        <h3 className={styles.rowTitle}>
-          {title}{" "}
-          <Badge tone={isLocalId(reservation.id) ? "dark" : "neutral"}>
-            {isLocalId(reservation.id) ? t.workspace.yourOwn : t.workspace.sample}
-          </Badge>
-        </h3>
-        <p className={styles.muted}>
-          {shortDate(reservation.pickup.date)} · {format(t.workspace.slotLabel, { slot: reservation.pickup.slot })} ·{" "}
-          {plural(t.common.portions, reservation.quantity)}
-        </p>
-        <StatusBadge status={reservation.status} />
-      </div>
-      {actions.length ? (
-        <div className={styles.rowActions}>
-          {actions.map((to) => {
-            const label = COOK_ACTIONS[to];
-            return label ? (
-              <button
-                key={to}
-                type="button"
-                className={buttonClass({ variant: to === "confirmed" ? "primary" : "secondary", size: "sm" })}
-                onClick={() => onTransition(to)}
-              >
-                {t.workspace[label]}
-                <span className="visually-hidden">: {title}, {shortDate(reservation.pickup.date)}</span>
-              </button>
-            ) : null;
-          })}
-        </div>
-      ) : null}
     </li>
   );
 }
