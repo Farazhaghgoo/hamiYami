@@ -65,6 +65,29 @@ test.describe("browsing", () => {
     await expect(results.locator("article", { hasText: "Esaurito" }).first()).not.toContainText("Prenota entro");
   });
 
+  test("sorts by price across the week and offers price steps from the menu", async ({ page }) => {
+    await page.goto("/it/meals");
+    const results = page.getByRole("region", { name: "Pasti disponibili" });
+    // Steps come from the prices on the menu (6,50–9,00 €), not from fixed amounts.
+    await expect(page.getByRole("radio", { name: /^Fino a/ })).toHaveCount(2);
+
+    await page.getByLabel("Ordina per").selectOption({ label: "Prezzo: dal più basso" });
+    await expect(page).toHaveURL(/sort=price_asc/);
+    // One list across the week, so cards show their pickup day again.
+    await expect(results.getByRole("heading", { level: 2 })).toHaveCount(0);
+    await expect(results.locator("article").first()).toContainText(/Ritiro \S+ \d+ \S+, \d{2}:\d{2}/);
+    const prices = (await results.locator("article strong").allInnerTexts()).map((p) =>
+      Number(p.replace(/[^\d,]/g, "").replace(",", ".")),
+    );
+    expect(prices.length).toBe(10);
+    expect(prices).toEqual([...prices].sort((a, b) => a - b));
+
+    // Clearing filters keeps the chosen order.
+    await page.getByRole("checkbox", { name: "Vegano" }).check();
+    await page.getByRole("button", { name: "Azzera filtri" }).first().click();
+    await expect(page.getByLabel("Ordina per")).toHaveValue("price_asc");
+  });
+
   test("filters in the URL survive a reload", async ({ page }) => {
     await page.goto("/it/meals?diet=vegetarian&maxPrice=800");
     await expect(page.getByRole("checkbox", { name: "Vegetariano" })).toBeChecked();

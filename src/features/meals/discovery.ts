@@ -4,7 +4,7 @@ import { dietaryTagSchema, type Allergen, type DietaryTag } from "@/domain/food-
 import type { LocalizedText } from "@/domain/localized";
 import type { MenuWindow } from "@/domain/menu-window";
 import type { Money } from "@/domain/money";
-import { computeAvailability, type Availability } from "@/domain/offering";
+import { computeAvailability, OFFERING_LIMITS, type Availability } from "@/domain/offering";
 import {
   civilDateSchema,
   romeDateOf,
@@ -32,16 +32,25 @@ export interface MealCardView {
   neighborhoodName: string;
 }
 
-export const PRICE_FILTER_OPTIONS = [700, 800, 900] as const;
+export const SORT_ORDERS = ["time", "price_asc", "price_desc"] as const;
+export type SortOrder = (typeof SORT_ORDERS)[number];
 
 export interface DiscoveryFilters {
   neighborhood: string | null;
   date: CivilDate | null;
   diet: DietaryTag[];
   maxPriceCents: number | null;
+  /** Pickup time (grouped by day) by default; customers can sort by price instead. */
+  sort: SortOrder;
 }
 
-export const EMPTY_FILTERS: DiscoveryFilters = { neighborhood: null, date: null, diet: [], maxPriceCents: null };
+export const EMPTY_FILTERS: DiscoveryFilters = {
+  neighborhood: null,
+  date: null,
+  diet: [],
+  maxPriceCents: null,
+  sort: "time",
+};
 
 type SearchParamsInput = Record<string, string | string[] | undefined> | URLSearchParams;
 
@@ -58,11 +67,17 @@ export function parseDiscoveryFilters(params: SearchParamsInput, window: MenuWin
   const date = readParam(params, "date")[0];
   const diet = readParam(params, "diet").flatMap((v) => v.split(","));
   const maxPrice = Number(readParam(params, "maxPrice")[0]);
+  const sort = readParam(params, "sort")[0];
   return {
     neighborhood: neighborhood && /^[a-z0-9-]{3,60}$/.test(neighborhood) ? neighborhood : null,
     date: date && civilDateSchema.safeParse(date).success && window.dates.includes(date) ? date : null,
     diet: [...new Set(diet)].filter((d): d is DietaryTag => dietaryTagSchema.safeParse(d).success),
-    maxPriceCents: (PRICE_FILTER_OPTIONS as readonly number[]).includes(maxPrice) ? maxPrice : null,
+    // Price steps come from the prices on the menu, so any sensible amount in cents is accepted.
+    maxPriceCents:
+      Number.isInteger(maxPrice) && maxPrice >= OFFERING_LIMITS.priceMinCents && maxPrice <= OFFERING_LIMITS.priceMaxCents
+        ? maxPrice
+        : null,
+    sort: (SORT_ORDERS as readonly string[]).includes(sort ?? "") ? (sort as SortOrder) : "time",
   };
 }
 
@@ -73,6 +88,7 @@ export function filtersToSearchParams(filters: DiscoveryFilters): URLSearchParam
   if (filters.date) params.set("date", filters.date);
   if (filters.diet.length) params.set("diet", filters.diet.join(","));
   if (filters.maxPriceCents !== null) params.set("maxPrice", String(filters.maxPriceCents));
+  if (filters.sort !== "time") params.set("sort", filters.sort);
   return params;
 }
 
@@ -135,7 +151,31 @@ export interface DiscoveryResult {
   neighborhood: Neighborhood | null;
   /** Offerings per date in the window for the chosen neighborhood, before other filters. */
   countsByDate: Record<CivilDate, number>;
+  /** "Up to" price steps (cents) based on the prices currently on the menu. */
+  priceOptions: number[];
   cards: MealCardView[];
+}
+
+/**
+ * Builds "up to" price steps from the prices on the menu: whole-euro points, leaving out the top one
+ * (it would include every dish). Cooks set prices freely, so fixed steps would soon stop fitting.
+ */
+export function priceFilterOptions(cards: Pick<MealCardView, "price">[], maxOptions = 4): number[] {
+  const points = [...new Set(cards.map((c) => Math.ceil(c.price.amountCents / 100) * 100))].sort((a, b) => a - b);
+  const steps = points.slice(0, -1);
+  if (steps.length <= maxOptions) return steps;
+  // Spread the steps evenly when there are many distinct prices.
+  return [...new Set(Array.from({ length: maxOptions }, (_, i) => steps[Math.round((i * (steps.length - 1)) / (maxOptions - 1))]!))];
+}
+
+export function sortCards(cards: MealCardView[], sort: SortOrder): MealCardView[] {
+  const byTime = (a: MealCardView, b: MealCardView) =>
+    a.pickupDate.localeCompare(b.pickupDate) || a.pickupWindow.start.localeCompare(b.pickupWindow.start);
+  const sorted = [...cards];
+  if (sort === "time") return sorted.sort(byTime);
+  const direction = sort === "price_asc" ? 1 : -1;
+  // Ties keep pickup-time order, so equal prices never reshuffle between visits.
+  return sorted.sort((a, b) => direction * (a.price.amountCents - b.price.amountCents) || byTime(a, b));
 }
 
 export async function discoverMeals(
@@ -163,7 +203,14 @@ export async function discoverMeals(
       (filters.maxPriceCents === null || card.price.amountCents <= filters.maxPriceCents),
   );
 
-  return { neighborhoods, neighborhood, countsByDate, cards };
+  // A step chosen earlier (e.g. from a shared link) stays visible even if the menu has changed.
+  const priceOptions = priceFilterOptions(all);
+  if (filters.maxPriceCents !== null && !priceOptions.includes(filters.maxPriceCents)) {
+    priceOptions.push(filters.maxPriceCents);
+    priceOptions.sort((a, b) => a - b);
+  }
+
+  return { neighborhoods, neighborhood, countsByDate, priceOptions, cards: sortCards(cards, filters.sort) };
 }
 
 export interface DayGroup {

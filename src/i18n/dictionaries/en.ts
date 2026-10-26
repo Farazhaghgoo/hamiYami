@@ -142,6 +142,10 @@ export const en: Dictionary = {
     backToPilot: "Back to {name}",
     gridLabel: "Available meals",
     tomorrow: "Tomorrow",
+    sortLabel: "Sort by",
+    sortTime: "Pickup day and time",
+    sortPriceAsc: "Price: low to high",
+    sortPriceDesc: "Price: high to low",
   },
   card: {
     pickup: "Pickup {date}, {start}–{end}",

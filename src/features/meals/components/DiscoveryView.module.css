@@ -197,9 +197,34 @@
   min-width: 0;
 }
 
+.resultsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
 .resultCount {
   font-weight: 650;
   color: var(--color-ink-muted);
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sortLabel {
+  font-weight: 650;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.sort .select {
+  width: auto;
+  min-width: 0;
 }
 
 .empty {

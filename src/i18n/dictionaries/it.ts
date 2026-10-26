@@ -147,6 +147,10 @@ export const it = {
     backToPilot: "Torna a {name}",
     gridLabel: "Pasti disponibili",
     tomorrow: "Domani",
+    sortLabel: "Ordina per",
+    sortTime: "Giorno e ora di ritiro",
+    sortPriceAsc: "Prezzo: dal più basso",
+    sortPriceDesc: "Prezzo: dal più alto",
   },
   card: {
     pickup: "Ritiro {date}, {start}–{end}",

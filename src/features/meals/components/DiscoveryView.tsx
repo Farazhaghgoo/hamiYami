@@ -15,9 +15,10 @@ import {
   filtersToSearchParams,
   groupByDay,
   hasActiveFilters,
-  PRICE_FILTER_OPTIONS,
+  SORT_ORDERS,
   type DiscoveryFilters,
   type DiscoveryResult,
+  type SortOrder,
 } from "../discovery";
 import { MealCard } from "./MealCard";
 import gridStyles from "./MealGrid.module.css";
@@ -47,6 +48,11 @@ export function DiscoveryView({
   const browsingPilot = result.neighborhood?.isPilot ?? false;
   const active = hasActiveFilters(filters, pilot?.id ?? null);
   const secondaryCount = filters.diet.length + (filters.maxPriceCents !== null ? 1 : 0);
+  const sortLabels: Record<SortOrder, string> = {
+    time: t.meals.sortTime,
+    price_asc: t.meals.sortPriceAsc,
+    price_desc: t.meals.sortPriceDesc,
+  };
 
   function update(next: Partial<DiscoveryFilters>) {
     const merged = { ...filters, ...next };
@@ -58,7 +64,8 @@ export function DiscoveryView({
   }
 
   function resetFilters() {
-    update({ ...EMPTY_FILTERS });
+    // Clearing filters keeps the chosen order: sorting is not filtering.
+    update({ ...EMPTY_FILTERS, sort: filters.sort });
   }
 
   return (
@@ -171,7 +178,7 @@ export function DiscoveryView({
               />
               {t.meals.anyPrice}
             </label>
-            {PRICE_FILTER_OPTIONS.map((cents) => (
+            {result.priceOptions.map((cents) => (
               <label key={cents} className={styles.check}>
                 <input
                   type="radio"
@@ -195,9 +202,28 @@ export function DiscoveryView({
 
       {/* Labelled without a heading so the day headings below can be h2 and dish titles h3. */}
       <section className={styles.results} aria-label={t.meals.gridLabel}>
-        <p className={styles.resultCount} role="status">
-          {plural(t.meals.results, result.cards.length)}
-        </p>
+        <div className={styles.resultsBar}>
+          <p className={styles.resultCount} role="status">
+            {plural(t.meals.results, result.cards.length)}
+          </p>
+          <div className={styles.sort}>
+            <label htmlFor={`${panelId}-sort`} className={styles.sortLabel}>
+              {t.meals.sortLabel}
+            </label>
+            <select
+              id={`${panelId}-sort`}
+              className={styles.select}
+              value={filters.sort}
+              onChange={(event) => update({ sort: event.target.value as SortOrder })}
+            >
+              {SORT_ORDERS.map((order) => (
+                <option key={order} value={order}>
+                  {sortLabels[order]}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         {!browsingPilot && result.neighborhood ? (
           <div className={styles.empty}>
@@ -224,6 +250,15 @@ export function DiscoveryView({
               {t.meals.reset}
             </button>
           </div>
+        ) : filters.sort !== "time" ? (
+          // Sorted by price: one list across the week, so cards show their pickup day again.
+          <ul className={gridStyles.grid}>
+            {result.cards.map((card, index) => (
+              <li key={card.offeringId}>
+                <MealCard card={card} priority={index < 2} />
+              </li>
+            ))}
+          </ul>
         ) : (
           <div className={styles.days}>
             {groupByDay(result.cards).map((group, groupIndex) => {

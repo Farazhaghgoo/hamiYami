@@ -80,12 +80,25 @@ describe("discovery filters in the URL", () => {
   const menu = menuWindow("2026-10-25");
 
   it("round-trips valid filters", () => {
-    const filters = { neighborhood: "nb-rione-melograno", date: "2026-10-27", diet: ["vegan" as const], maxPriceCents: 800 };
+    const filters = {
+      neighborhood: "nb-rione-melograno",
+      date: "2026-10-27",
+      diet: ["vegan" as const],
+      maxPriceCents: 750,
+      sort: "price_desc" as const,
+    };
     expect(parseDiscoveryFilters(filtersToSearchParams(filters), menu)).toEqual(filters);
   });
 
   it("ignores malformed or out-of-window values instead of trusting them", () => {
-    const params = new URLSearchParams("area=<script>&date=2020-01-01&diet=vegan,gluten-free&maxPrice=123");
-    expect(parseDiscoveryFilters(params, menu)).toEqual({ neighborhood: null, date: null, diet: ["vegan"], maxPriceCents: null });
+    const params = new URLSearchParams("area=<script>&date=2020-01-01&diet=vegan,gluten-free&maxPrice=12.5&sort=random");
+    expect(parseDiscoveryFilters(params, menu)).toEqual({
+      neighborhood: null,
+      date: null,
+      diet: ["vegan"],
+      maxPriceCents: null,
+      sort: "time",
+    });
+    expect(parseDiscoveryFilters(new URLSearchParams("maxPrice=99999999"), menu).maxPriceCents).toBeNull();
   });
 });
