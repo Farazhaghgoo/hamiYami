@@ -4,7 +4,7 @@ import { createDemoRepositories } from "@/data/demo/demo-repositories";
 import { createStaticDemoStore } from "@/data/demo/demo-store";
 import { buildSeedCatalog } from "@/data/demo/seed";
 import { menuWindow } from "@/domain/menu-window";
-import { buildStoryData } from "@/features/story/data";
+import { buildStoryData, eveningLoads } from "@/features/story/data";
 
 const anchor = "2026-10-25";
 const { catalog } = createDemoRepositories({
@@ -43,5 +43,15 @@ describe("story numbers", () => {
     expect(dishes[dishes.length - 1]).toMatchObject({ mealId: "meal-lasagna", unitPriceCents: 257, unit: "g" });
     const perHundred = dishes.map((d) => d.unitPriceCents);
     expect(perHundred).toEqual([...perHundred].sort((a, b) => a - b));
+  });
+
+  it("adds up portions per evening, earliest first", async () => {
+    const data = await buildStoryData(catalog, menuWindow(anchor));
+    const loads = eveningLoads(data!.offerings);
+    expect(loads).toHaveLength(data!.eveningCount);
+    expect(loads.map((l) => l.date)).toEqual([...loads.map((l) => l.date)].sort());
+    expect(loads.reduce((sum, l) => sum + l.reserved, 0)).toBe(data!.reservedTotal);
+    expect(loads.reduce((sum, l) => sum + l.capacity, 0)).toBe(data!.capacityTotal);
+    for (const load of loads) expect(load.reserved).toBeLessThanOrEqual(load.capacity);
   });
 });

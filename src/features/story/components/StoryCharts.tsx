@@ -8,7 +8,7 @@ import type { CivilDate } from "@/domain/time";
 import { intlLocale } from "@/i18n/config";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Icon, type IconName } from "@/shared/ui/Icon";
-import type { StoryData, StoryDish, StoryOffering } from "../data";
+import { eveningLoads, type StoryData, type StoryDish, type StoryOffering } from "../data";
 import styles from "./StoryCharts.module.css";
 
 /*
@@ -161,24 +161,6 @@ export function UnitPriceBars({ dishes }: { dishes: StoryDish[] }) {
       </ul>
     </figure>
   );
-}
-
-export interface EveningLoad {
-  date: CivilDate;
-  reserved: number;
-  capacity: number;
-}
-
-/** Portions reserved and planned, added up per evening. */
-export function eveningLoads(offerings: StoryOffering[]): EveningLoad[] {
-  const byDate = new Map<CivilDate, EveningLoad>();
-  for (const o of offerings) {
-    const load = byDate.get(o.date) ?? { date: o.date, reserved: 0, capacity: 0 };
-    load.reserved += o.reserved;
-    load.capacity += o.capacity;
-    byDate.set(o.date, load);
-  }
-  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function ReservedMeters({ data }: { data: StoryData }) {

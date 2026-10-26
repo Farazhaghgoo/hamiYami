@@ -51,6 +51,24 @@ export interface StoryData {
   pickupCodeLength: number;
 }
 
+export interface EveningLoad {
+  date: CivilDate;
+  reserved: number;
+  capacity: number;
+}
+
+/** Portions reserved and planned, added up per evening, earliest first. */
+export function eveningLoads(offerings: StoryOffering[]): EveningLoad[] {
+  const byDate = new Map<CivilDate, EveningLoad>();
+  for (const o of offerings) {
+    const load = byDate.get(o.date) ?? { date: o.date, reserved: 0, capacity: 0 };
+    load.reserved += o.reserved;
+    load.capacity += o.capacity;
+    byDate.set(o.date, load);
+  }
+  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export async function buildStoryData(catalog: CatalogRepository, menu: MenuWindow): Promise<StoryData | null> {
   const [neighborhoods, cooks, meals] = await Promise.all([
     catalog.listNeighborhoods(),

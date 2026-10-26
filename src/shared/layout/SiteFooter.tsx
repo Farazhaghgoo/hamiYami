@@ -28,6 +28,7 @@ export function SiteFooter({ i18n }: { i18n: I18n }) {
           <div>
             <h2 className={styles.heading}>{t.footer.project}</h2>
             <ul>
+              <li><Link href={href("/story")}>{t.footer.story}</Link></li>
               <li><Link href={href("/trust")}>{t.footer.trust}</Link></li>
               <li><Link href={href("/demo")}>{t.footer.aboutDemo}</Link></li>
               <li><Link href={href("/waitlist")}>{t.footer.waitlist}</Link></li>

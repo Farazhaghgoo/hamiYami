@@ -100,6 +100,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             ))}
           </ol>
           <p className={styles.howNote}>{t.home.howNote}</p>
+          <Link href={href("/story")} className={styles.panelLink}>
+            {t.story.homeLink}
+            <Icon name="arrowRight" />
+          </Link>
         </div>
       </section>
 

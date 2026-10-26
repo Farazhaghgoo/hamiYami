@@ -4,8 +4,7 @@ import type { ReactNode } from "react";
 import { pickText } from "@/domain/localized";
 import { eur } from "@/domain/money";
 import { useI18n } from "@/i18n/I18nProvider";
-import type { StoryDish, StoryOffering } from "../data";
-import { eveningLoads } from "./StoryCharts";
+import { eveningLoads, type StoryDish, type StoryOffering } from "../data";
 import styles from "./StoryTables.module.css";
 
 /** The numbers behind a chart, as a table: the chart is never the only way to read them. */
