@@ -66,8 +66,11 @@ function fromMinutes(total: number): LocalTime {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+/** Customers choose a pickup time in steps of this many minutes. */
+export const PICKUP_SLOT_MINUTES = 15;
+
 /** Pickup slots a customer can choose within a window, e.g. every 15 minutes. */
-export function pickupSlots(window: PickupWindow, stepMinutes = 15): LocalTime[] {
+export function pickupSlots(window: PickupWindow, stepMinutes = PICKUP_SLOT_MINUTES): LocalTime[] {
   const slots: LocalTime[] = [];
   for (let t = toMinutes(window.start); t < toMinutes(window.end); t += stepMinutes) {
     slots.push(fromMinutes(t));
