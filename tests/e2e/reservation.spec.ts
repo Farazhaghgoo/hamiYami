@@ -100,6 +100,8 @@ test.describe("simulated reservation", () => {
     await openReservableMeal(page);
     await page.getByRole("button", { name: "Prenota (simulazione)" }).click();
     await page.getByRole("button", { name: "Continua" }).click();
+    // Wait for the pickup step before submitting it without a time.
+    await expect(page.getByRole("heading", { name: /Passo 2 di 3/ })).toBeVisible();
     await page.getByRole("button", { name: "Continua" }).click();
     await expect(page.getByText("Scegli un orario di ritiro.")).toBeVisible();
     await expect(page.getByRole("heading", { name: /Passo 2 di 3/ })).toBeVisible();
