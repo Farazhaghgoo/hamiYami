@@ -30,7 +30,7 @@ test.describe("cook workspace (simulation)", () => {
     const date = await page.getByLabel("Giorno di ritiro").inputValue();
     await page.getByLabel("Prezzo a porzione (€)").fill("0,20");
     await page.getByRole("button", { name: "Salva data" }).click();
-    await expect(page.getByText("Inserisci un prezzo tra 1 € e 50 €, ad esempio 8,50.").first()).toBeVisible();
+    await expect(page.getByText("Inserisci un prezzo tra 0,50 € e 200,00 €, ad esempio 8,50.").first()).toBeVisible();
     await page.getByLabel("Prezzo a porzione (€)").fill("7,50");
     await page.getByRole("button", { name: "Salva data" }).click();
     await expect(page.getByText("Modifiche salvate in questa demo.")).toBeVisible();
@@ -40,7 +40,8 @@ test.describe("cook workspace (simulation)", () => {
     const card = page.locator("article", { hasText: "Torta salata di verdure" });
     await expect(card).toContainText("7,50 €");
     await card.locator("h3 a").click();
-    await expect(page.getByRole("img", { name: /Foto non disponibile/ })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Torta salata di verdure" })).toBeVisible();
+    await expect(page.getByRole("img", { name: "Torta salata di verdure: Foto non disponibile" })).toBeVisible();
     await expect(page.getByText("Cereali contenenti glutine")).toBeVisible();
 
     // Edit the price, then unpublish.
@@ -54,6 +55,33 @@ test.describe("cook workspace (simulation)", () => {
 
     await page.goto(`/it/meals?date=${date}`);
     await expect(page.locator("article", { hasText: "Torta salata di verdure" })).toHaveCount(0);
+  });
+
+  test("lets cooks set any price, asking only to confirm one far from the local range", async ({ page }) => {
+    await page.goto("/it/cook-workspace");
+    await page.getByRole("link", { name: /^Modifica\s?: Lasagna al ragù, gio/ }).click();
+    const price = page.getByLabel("Prezzo a porzione (€)");
+
+    // 85 € next to dishes at 6,50–9,00 € is probably a typo for 8,50 €.
+    await price.fill("85");
+    await page.getByRole("button", { name: "Salva data" }).click();
+    const dialog = page.getByRole("dialog", { name: "Prezzo insolito: confermi 85,00 €?" });
+    await expect(dialog).toContainText("tra 6,50 € e 9,00 €");
+    await dialog.getByRole("button", { name: "Correggi il prezzo" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL(/\/offerings\//);
+
+    // The cook decides: confirming keeps the unusual price.
+    await page.getByRole("button", { name: "Salva data" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Sì, salva a 85,00 €" }).click();
+    await expect(page.getByText("Modifiche salvate in questa demo.")).toBeVisible();
+    await expect(page.locator("li", { hasText: "Ritiro gio" }).filter({ hasText: "Lasagna al ragù" }).first()).toContainText("85,00 €");
+
+    // An ordinary price saves straight away.
+    await page.getByRole("link", { name: /^Modifica\s?: Lasagna al ragù, gio/ }).click();
+    await price.fill("9,50");
+    await page.getByRole("button", { name: "Salva data" }).click();
+    await expect(page.getByText("Modifiche salvate in questa demo.")).toBeVisible();
   });
 
   test("refuses capacity below portions already reserved", async ({ page }) => {

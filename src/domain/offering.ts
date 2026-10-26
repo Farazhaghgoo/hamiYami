@@ -18,8 +18,10 @@ export const OFFERING_LIMITS = {
   cutoffMinutesMin: 60,
   cutoffMinutesMax: 48 * 60,
   lowStockThreshold: 3,
-  priceMinCents: 100,
-  priceMaxCents: 5000,
+  // Cooks choose their prices freely. These wide bounds only reject impossible values; unusual
+  // prices inside them get a confirmation step instead (see domain/pricing.ts).
+  priceMinCents: 50,
+  priceMaxCents: 20000,
 } as const;
 
 export const offeringStatusSchema = z.enum(["published", "unpublished"]);

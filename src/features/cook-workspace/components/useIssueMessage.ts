@@ -1,11 +1,13 @@
 "use client";
 
+import { eur } from "@/domain/money";
+import { OFFERING_LIMITS } from "@/domain/offering";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { FieldIssue } from "../forms";
 
 /** Translates validation codes from the workspace forms into messages. */
 export function useIssueMessage() {
-  const { t, format } = useI18n();
+  const { t, format, money } = useI18n();
   const v = t.validation;
   return (issue: FieldIssue | undefined, values: Record<string, number> = {}): string | undefined => {
     if (!issue) return undefined;
@@ -29,7 +31,10 @@ export function useIssueMessage() {
       case "window_too_long":
         return v.windowTooLong;
       case "invalid_price":
-        return v.invalidPrice;
+        return format(v.invalidPrice, {
+          min: money(eur(OFFERING_LIMITS.priceMinCents)),
+          max: money(eur(OFFERING_LIMITS.priceMaxCents)),
+        });
       case "invalid_integer":
         return v.invalidInteger;
       case "capacity_range":

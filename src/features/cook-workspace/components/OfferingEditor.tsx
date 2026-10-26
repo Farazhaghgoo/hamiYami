@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import type { OfferingSnapshot } from "@/data/contracts";
+import type { OfferingDraft, OfferingSnapshot } from "@/data/contracts";
 import { DEMO_COOK_ID } from "@/data/demo";
 import { useDemo, useDemoQuery } from "@/data/demo/DemoProvider";
 import type { Meal } from "@/domain/catalog";
 import { pickText } from "@/domain/localized";
 import { schedulableRange } from "@/domain/menu-window";
+import { eur } from "@/domain/money";
+import { isUnusualPrice, priceStats, type PriceStats } from "@/domain/pricing";
 import { useI18n } from "@/i18n/I18nProvider";
 import { buttonClass } from "@/shared/ui/button";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { ErrorSummary } from "@/shared/ui/ErrorSummary";
 import { ChoiceGroup, SelectField, TextField, formStyles } from "@/shared/ui/fields";
 import { Icon } from "@/shared/ui/Icon";
@@ -40,22 +43,47 @@ const FIELD_IDS: Record<OfferingField, string> = {
   status: "offering-status",
 };
 
+/** Prices of other dishes on sale nearby, used to describe the local market to the cook. */
+export interface LocalMarket {
+  neighborhoodName: string;
+  stats: PriceStats | null;
+}
+
 interface EditorData {
   meals: Meal[];
   existing: OfferingSnapshot | null;
+  market: LocalMarket;
 }
 
 export function OfferingEditor({ offeringId, presetMealId }: { offeringId: string | null; presetMealId: string | null }) {
   const { t, href } = useI18n();
+  const { anchor } = useDemo();
   const { data, ready } = useDemoQuery(
     `offering-editor:${offeringId}`,
     async (repos): Promise<EditorData> => {
-      const meals = await repos.cookWorkspace.listMeals();
-      const snapshot = offeringId ? await repos.catalog.getOffering(offeringId) : null;
-      // Only the demo cook's own offerings can be edited here.
-      return { meals, existing: snapshot && snapshot.offering.cookId === DEMO_COOK_ID ? snapshot : null };
+      const range = schedulableRange(anchor);
+      const [meals, snapshot, cook, neighborhoods] = await Promise.all([
+        repos.cookWorkspace.listMeals(),
+        offeringId ? repos.catalog.getOffering(offeringId) : null,
+        repos.catalog.getCook(DEMO_COOK_ID),
+        repos.catalog.listNeighborhoods(),
+      ]);
+      const local = cook
+        ? await repos.catalog.listOfferings({ from: range.min, to: range.max, neighborhoodId: cook.neighborhoodId })
+        : [];
+      return {
+        meals,
+        // Only the demo cook's own offerings can be edited here.
+        existing: snapshot && snapshot.offering.cookId === DEMO_COOK_ID ? snapshot : null,
+        market: {
+          neighborhoodName: neighborhoods.find((n) => n.id === cook?.neighborhoodId)?.name ?? "",
+          stats: priceStats(
+            local.filter((s) => s.offering.id !== offeringId).map((s) => s.offering.price.amountCents),
+          ),
+        },
+      };
     },
-    { meals: [], existing: null },
+    { meals: [], existing: null, market: { neighborhoodName: "", stats: null } },
   );
 
   if (!ready) return <p className={styles.muted}>{t.common.loading}</p>;
@@ -73,19 +101,29 @@ export function OfferingEditor({ offeringId, presetMealId }: { offeringId: strin
       </Notice>
     );
   }
-  return <OfferingForm key={offeringId ?? "new"} meals={data.meals} existing={data.existing} presetMealId={presetMealId} />;
+  return (
+    <OfferingForm
+      key={offeringId ?? "new"}
+      meals={data.meals}
+      existing={data.existing}
+      market={data.market}
+      presetMealId={presetMealId}
+    />
+  );
 }
 
 function OfferingForm({
   meals,
   existing,
+  market,
   presetMealId,
 }: {
   meals: Meal[];
   existing: OfferingSnapshot | null;
+  market: LocalMarket;
   presetMealId: string | null;
 }) {
-  const { t, locale, href, plural, format } = useI18n();
+  const { t, locale, href, plural, format, money } = useI18n();
   const { anchor, repositories } = useDemo();
   const router = useRouter();
   const issueMessage = useIssueMessage();
@@ -110,6 +148,9 @@ function OfferingForm({
   const [attempt, setAttempt] = useState(0);
   const saving = useRef(false);
   const reserved = existing?.reservedPortions ?? 0;
+  // An unusual price waiting for the cook's confirmation, and the last price they confirmed.
+  const [unusual, setUnusual] = useState<OfferingDraft | null>(null);
+  const confirmedCents = useRef<number | null>(null);
 
   const set = (field: OfferingField, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -138,6 +179,23 @@ function OfferingForm({
     setAttempt((n) => n + 1);
   }
 
+  async function save(draft: OfferingDraft) {
+    saving.current = true;
+    const result = await repositories.cookWorkspace.saveOffering(draft, new Date());
+    if (!result.ok) {
+      const field: OfferingField =
+        result.error === "capacity_below_reserved" ? "capacity" : result.error === "date_in_past" ? "pickupDate" : "mealId";
+      const code =
+        result.error === "date_in_past"
+          ? "date_out_of_range"
+          : result.error === "capacity_below_reserved"
+            ? "capacity_below_reserved"
+            : result.error;
+      return fail({ [field]: { code } });
+    }
+    router.push(href("/cook-workspace?saved=offering#offerings"));
+  }
+
   return (
     <form
       className={styles.form}
@@ -149,28 +207,14 @@ function OfferingForm({
         const parsed = offeringFormSchema(anchor).safeParse(values);
         if (!parsed.success) return fail(collectIssues(parsed.error) as FieldIssues<OfferingField>);
 
-        const result = await repositories.cookWorkspace.saveOffering(
-          offeringFormToDraft(parsed.data, existing?.offering.id),
-          new Date(),
-        );
-        if (!result.ok) {
-          const field: OfferingField =
-            result.error === "capacity_below_reserved"
-              ? "capacity"
-              : result.error === "date_in_past"
-                ? "pickupDate"
-                : result.error === "meal_not_found"
-                  ? "mealId"
-                  : "mealId";
-          const code =
-            result.error === "date_in_past"
-              ? "date_out_of_range"
-              : result.error === "capacity_below_reserved"
-                ? "capacity_below_reserved"
-                : result.error;
-          return fail({ [field]: { code } });
+        const draft = offeringFormToDraft(parsed.data, existing?.offering.id);
+        // No price control: an unusual price only asks for confirmation, once per value.
+        if (isUnusualPrice(draft.price.amountCents, market.stats) && confirmedCents.current !== draft.price.amountCents) {
+          saving.current = false;
+          setUnusual(draft);
+          return;
         }
-        router.push(href("/cook-workspace?saved=offering#offerings"));
+        await save(draft);
       }}
     >
       <ErrorSummary errors={errorList} focusKey={attempt} />
@@ -302,6 +346,30 @@ function OfferingForm({
           {t.common.cancel}
         </Link>
       </div>
+      {unusual && market.stats ? (
+        <ConfirmDialog
+          open
+          title={format(t.offeringForm.unusualTitle, { price: money(unusual.price) })}
+          confirmLabel={format(t.offeringForm.unusualConfirm, { price: money(unusual.price) })}
+          cancelLabel={t.offeringForm.unusualFix}
+          tone="secondary"
+          onClose={() => setUnusual(null)}
+          onConfirm={() => {
+            confirmedCents.current = unusual.price.amountCents;
+            const draft = unusual;
+            setUnusual(null);
+            void save(draft);
+          }}
+        >
+          <p>
+            {format(t.offeringForm.unusualBody, {
+              neighborhood: market.neighborhoodName,
+              min: money(eur(market.stats.minCents)),
+              max: money(eur(market.stats.maxCents)),
+            })}
+          </p>
+        </ConfirmDialog>
+      ) : null}
     </form>
   );
 }
