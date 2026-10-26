@@ -87,6 +87,19 @@ test.describe("cook workspace (simulation)", () => {
     await expect(page.getByText("Modifiche salvate in questa demo.")).toBeVisible();
   });
 
+  test("shows cooks the local price range and what their price is per 100 g", async ({ page }) => {
+    await page.goto("/it/cook-workspace/offerings/new?meal=meal-lasagna");
+    const reference = page.locator("#offering-market");
+    await expect(reference).toContainText("Prezzi nel quartiere");
+    await expect(reference).toContainText("da 6,50 € a 9,00 € a porzione; il prezzo a metà è 8,50 €");
+    await expect(reference).toContainText("il prezzo lo decidi tu");
+    // The price field is described by the reference, for screen-reader users.
+    await expect(page.getByLabel("Prezzo a porzione (€)")).toHaveAttribute("aria-describedby", /offering-market/);
+
+    await page.getByLabel("Prezzo a porzione (€)").fill("9");
+    await expect(reference).toContainText("Con una porzione da 350 g, il tuo prezzo corrisponde a 2,57 €/100 g.");
+  });
+
   test("refuses capacity below portions already reserved", async ({ page }) => {
     await page.goto("/it/cook-workspace");
     await page.getByRole("link", { name: /^Modifica\s?: Lasagna al ragù/ }).first().click();

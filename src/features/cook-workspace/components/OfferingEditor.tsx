@@ -9,8 +9,9 @@ import { useDemo, useDemoQuery } from "@/data/demo/DemoProvider";
 import type { Meal } from "@/domain/catalog";
 import { pickText } from "@/domain/localized";
 import { schedulableRange } from "@/domain/menu-window";
-import { eur } from "@/domain/money";
-import { isUnusualPrice, priceStats, type PriceStats } from "@/domain/pricing";
+import { eur, parseEuroInput } from "@/domain/money";
+import { OFFERING_LIMITS } from "@/domain/offering";
+import { isUnusualPrice, priceStats, unitPricePer100, type PriceStats } from "@/domain/pricing";
 import { useI18n } from "@/i18n/I18nProvider";
 import { buttonClass } from "@/shared/ui/button";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
@@ -274,21 +275,25 @@ function OfferingForm({
           id={FIELD_IDS.price}
           label={t.offeringForm.price}
           hint={t.offeringForm.priceHint}
+          // The local price reference below also describes this field.
+          aria-describedby={[`${FIELD_IDS.price}-hint`, "offering-market", issues.price ? `${FIELD_IDS.price}-error` : ""]
+            .filter(Boolean)
+            .join(" ")}
           inputMode="decimal"
           autoComplete="off"
           value={values.price}
           onChange={(e) => set("price", e.target.value)}
           error={message("price")}
         />
+        <MarketReference market={market} meal={meals.find((m) => m.id === values.mealId) ?? null} price={values.price} />
         <div className={formStyles.row}>
           <TextField
             id={FIELD_IDS.capacity}
             label={t.offeringForm.capacity}
-            hint={
-              existing
-                ? `${t.offeringForm.capacityHint} ${format(t.offeringForm.reserved, { count: reserved })}`
-                : t.offeringForm.capacityHint
-            }
+            // The hint sits under both fields so they line up; it is linked here by hand.
+            aria-describedby={["offering-capacity-hint", issues.capacity ? `${FIELD_IDS.capacity}-error` : ""]
+              .filter(Boolean)
+              .join(" ")}
             type="number"
             inputMode="numeric"
             min={Math.max(1, reserved)}
@@ -309,6 +314,11 @@ function OfferingForm({
             error={message("maxPerReservation")}
           />
         </div>
+        <p id="offering-capacity-hint" className={formStyles.hint}>
+          {existing
+            ? `${t.offeringForm.capacityHint} ${format(t.offeringForm.reserved, { count: reserved })}`
+            : t.offeringForm.capacityHint}
+        </p>
         <SelectField
           id={FIELD_IDS.cutoffHours}
           label={t.offeringForm.cutoff}
@@ -371,5 +381,41 @@ function OfferingForm({
         </ConfirmDialog>
       ) : null}
     </form>
+  );
+}
+
+/**
+ * What dishes cost nearby, as a reference while the cook sets a price, and what the typed price
+ * works out to per 100 g or 100 ml. Information only: the cook decides.
+ */
+function MarketReference({ market, meal, price }: { market: LocalMarket; meal: Meal | null; price: string }) {
+  const { t, format, money } = useI18n();
+  const cents = parseEuroInput(price);
+  const size = meal?.portionSize;
+  const validPrice =
+    cents !== null && cents >= OFFERING_LIMITS.priceMinCents && cents <= OFFERING_LIMITS.priceMaxCents;
+  return (
+    <div id="offering-market" className={styles.market}>
+      <p className={styles.marketTitle}>{t.offeringForm.marketTitle}</p>
+      <p>
+        {market.stats
+          ? format(t.offeringForm.marketRange, {
+              neighborhood: market.neighborhoodName,
+              min: money(eur(market.stats.minCents)),
+              max: money(eur(market.stats.maxCents)),
+              median: money(eur(market.stats.medianCents)),
+            })
+          : t.offeringForm.marketNone}
+      </p>
+      {size && validPrice ? (
+        <p>
+          {format(t.offeringForm.yourUnitPrice, {
+            size: `${size.amount} ${size.unit}`,
+            unitPrice: format(t.card.unitPrice, { price: money(unitPricePer100(eur(cents), size)), unit: size.unit }),
+          })}
+        </p>
+      ) : null}
+      <p className={styles.muted}>{t.offeringForm.marketNote}</p>
+    </div>
   );
 }
