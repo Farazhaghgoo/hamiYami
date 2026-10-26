@@ -31,6 +31,7 @@ HamiYami is a planned marketplace for meals prepared by neighborhood cooks in It
 | Journey | Where | What it demonstrates |
 |---|---|---|
 | Homepage | `/it` | The dinner use case, prelaunch status, this week's meals, how it would work, a short trust summary, the cook journey |
+| Our story | `/it/story` | A scrollytelling landing page in three chapters: how it was, how it is now (the problems), how we solve it. On wide screens the words scroll past a pinned graphic; on phones each graphic follows its words. The third chapter's charts (the menu week, a price strip with the middle price, price per 100 g, portions reserved of those planned) are computed from the demo menu, labelled as demo data, and each has a "See the data" table |
 | Meal discovery | `/it/meals` | Weekly menu for the pilot neighborhood, grouped by pickup day; each card says when reservations close (Rome time) and shows the portion size with the price per 100 g/ml; sort by pickup time or price; day, neighborhood, dietary-preference and price filters (price steps come from the prices on the menu; all kept in the URL); empty states; fictional availability |
 | Meal details | `/it/meals/{offering}` | Photo or neutral placeholder, portion, ingredients, declared allergens and possible cross-contact (kept apart from dietary preferences), cook, pickup window and area, quantity, sold-out and closed states |
 | Simulated reservation | `/it/meals/{offering}/reserve` | Portions → pickup time → review → demo confirmation. No payment, no account, no personal details. Double-submit and Back-button safe |
@@ -112,6 +113,7 @@ src/
     cooks/                cook profile query + components
     reservations/         reservation flow, list, detail, pickup pass, calendar export, idempotency attempt keys
     cook-workspace/       form schemas, prep plan, editors, workspace view
+    story/                the story page's numbers (computed through the catalog contract), scrollytelling, charts, drawings
     waitlist/             shared schema, approved consent registry, form
   server/                 server-only: env validation, CSP builder, waitlist handler/store/rate limit
   i18n/                   locales, dictionaries (it = shape, en typed against it), formatting helpers
@@ -233,6 +235,7 @@ The contracts in `src/data/contracts.ts` are the seam: screens and application f
   - Don't claim that photos prove a meal is safe, or that provider agreements remove HamiYami's responsibility.
   - Keep the closing disclaimer: *"These are planned processes, subject to professional review and pilot validation. No verification process can eliminate every food-safety risk."*
   - When a process actually starts running, update its wording here and in the homepage trust summary at the same time.
+- **Story page** (`/story`). The first two chapters are narrative: no statistics about the world, no market sizes, no quotes. Every number in the third chapter comes from `features/story/data.ts` and sits under the demo-data label; when a database replaces the demo, the numbers follow and the label must change with them.
 - **Translations** live in `src/i18n/dictionaries/`. `it.ts` defines the shape; `en.ts` must match it (type-checked, plus a test for identical keys and placeholders). Consent wording lives in `features/waitlist/consent.ts`: add a new version when changing it, never edit an existing one.
 
 ## Brand assets and images
@@ -241,11 +244,11 @@ Logos were supplied by HamiYami (originals in `brand-source/`) and traced to SVG
 
 | Image | Used for | Source (Unsplash License) |
 |---|---|---|
-| `lasagna-480/800.webp` (4:3) | Lasagna dish, sharing image | [Clare Andrews](https://unsplash.com/photos/freshly-baked-lasagna-with-a-basil-leaf-garnish-rBhXooUziZc) |
-| `curry-480/800.webp` (4:3) | Chickpea curry dish | [Weronika Krztoń](https://unsplash.com/photos/a-bowl-of-food-on-a-table-next-to-a-lemon-HJPd-_0bP-o) |
-| `stuffed-480/800.webp` (4:3) | Stuffed peppers dish | [Compagnons](https://unsplash.com/photos/stainless-steel-fork-on-red-sauce-OWVF8-s-RYs) |
-| `hero-640/960/1280.webp` (4:5) | Become-a-cook page (cooking process) | [Lorenzo Tomassetti](https://unsplash.com/photos/a-person-using-a-small-tool-to-cut-dough-HnFlyM638mc) |
-| `cook-640/960.webp` (4:5) | Homepage cook section (cooking process) | [Nadya Spetnitskaya](https://unsplash.com/photos/person-making-dough-beside-brown-wooden-rolling-pin-tOYiQxF9-Ys) |
+| `lasagna-480/800.webp` (4:3) | Lasagna dish, sharing image, story page | [Clare Andrews](https://unsplash.com/photos/freshly-baked-lasagna-with-a-basil-leaf-garnish-rBhXooUziZc) |
+| `curry-480/800.webp` (4:3) | Chickpea curry dish, story hero | [Weronika Krztoń](https://unsplash.com/photos/a-bowl-of-food-on-a-table-next-to-a-lemon-HJPd-_0bP-o) |
+| `stuffed-480/800.webp` (4:3) | Stuffed peppers dish, story hero | [Compagnons](https://unsplash.com/photos/stainless-steel-fork-on-red-sauce-OWVF8-s-RYs) |
+| `hero-640/960/1280.webp` (4:5) | Become-a-cook page, story page (cooking process) | [Lorenzo Tomassetti](https://unsplash.com/photos/a-person-using-a-small-tool-to-cut-dough-HnFlyM638mc) |
+| `cook-640/960.webp` (4:5) | Homepage cook section, story page (cooking process) | [Nadya Spetnitskaya](https://unsplash.com/photos/person-making-dough-beside-brown-wooden-rolling-pin-tOYiQxF9-Ys) |
 | `og-image.png` (1200×630) | Social sharing | Rendered from `scripts/og-image.html` (`npm run og-image`) |
 
 The photos are generic stock, hands-only, not presented as HamiYami cooks or customers. Only dishes that match a photo use one; the other fictional dishes and all cook-created dishes show a neutral "no photo" placeholder rather than an unrelated image. Every meal image uses a 4:3 frame and falls back to the placeholder if it fails to load. Confirm that the Unsplash License suits your use before a real launch, or replace the photos with your own. When replacing a dish photo, keep 4:3 and update its alt text in `src/data/fixtures/catalog.ts`.
@@ -255,6 +258,7 @@ The photos are generic stock, hands-only, not presented as HamiYami cooks or cus
 - Semantic landmarks, one `h1` per page, ordered headings, a skip link, visible focus (3px outline), persistent labels, inline errors linked with `aria-describedby`/`aria-invalid`, and error summaries that receive focus.
 - Native `<dialog>` for confirmations (focus trap, Escape, focus returned to the opener). Focus moves to the new step heading in the reservation flow, to the confirmation, and to outcome messages when the control used disappears.
 - Touch targets of at least 44px. Reduced-motion preferences remove transitions. Text colour pairs meet WCAG AA.
+- The story page works without scrolling tricks: without JavaScript, and on screens under 900px, every graphic sits after its words. On wide screens only the active graphic is reachable (the others are `inert`), graphics fade rather than move, the drawings animate once for under five seconds, and none of it runs under reduced motion. Every chart has a table of the same numbers.
 - On phones the meal list comes first, day chips scroll inside their own row, and the reserve button sits in the normal page flow (no fixed bar covering content or focus).
 - Checked at 320, 375, 768 and 1280px with no horizontal page scrolling.
 
@@ -264,9 +268,9 @@ Last run on 26 October 2026, Windows 11, Node 24.20, Chrome stable:
 
 - `npm run typecheck`: pass (strict TypeScript, route types generated).
 - `npm run lint`: pass, no warnings.
-- `npm test`: 114 unit tests pass (open pricing bounds, typo check and price per 100 g, price-step and price sorting, domain time/DST, money, capacity, reservation transitions, demo storage parsing and versioning, demo repositories including idempotency, isolation and reset, day grouping and cut-off display, pickup codes, calendar files (UTC times across the clock change, escaping, 75-octet folding), the cook prep plan, cook forms, waitlist schema/handler/config/store, translations, CSP, URL filters).
+- `npm test`: 117 unit tests pass (the story numbers and per-evening totals, open pricing bounds, typo check and price per 100 g, price-step and price sorting, domain time/DST, money, capacity, reservation transitions, demo storage parsing and versioning, demo repositories including idempotency, isolation and reset, day grouping and cut-off display, pickup codes, calendar files (UTC times across the clock change, escaping, 75-octet folding), the cook prep plan, cook forms, waitlist schema/handler/config/store, translations, CSP, URL filters).
 - `npm run build`: pass. With `WAITLIST_COLLECTION_ENABLED=true` and nothing else set, the build fails with the expected list of missing settings.
-- `npm run test:e2e` (`PLAYWRIGHT_CHANNEL=chrome`): 44 browser tests pass on desktop and mobile emulation. They cover browsing, day grouping, sorting by price, menu-based price steps, portion sizes, filters, meal details, sold-out and quantity rules, reservation completion, cancellation, duplicate submission and Back/Forward, the pickup code and a real .ics download (with no request made), the cook workspace (free pricing with the typo confirmation, the neighborhood price reference) and prep view (including a customer's reservation reaching the same visitor's pickup list with the same code, and the cook's decision showing on the customer's page), per-visitor isolation, reset, corrupted and outdated storage, language switching, keyboard-only reservation, skip link and focus, disabled waitlist (asserts no request is made), the API refusing to store, security headers, no CSP violations, no third-party requests, and no horizontal overflow at 320/375/768px.
+- `npm run test:e2e` (`PLAYWRIGHT_CHANNEL=chrome`): 51 browser tests pass on desktop and mobile emulation. They cover the story page (three chapters, the demo-data label, chart tables matching the words, the pinned graphic, the price tooltip, phone layout, reduced motion, English, links from the home page and footer), browsing, day grouping, sorting by price, menu-based price steps, portion sizes, filters, meal details, sold-out and quantity rules, reservation completion, cancellation, duplicate submission and Back/Forward, the pickup code and a real .ics download (with no request made), the cook workspace (free pricing with the typo confirmation, the neighborhood price reference) and prep view (including a customer's reservation reaching the same visitor's pickup list with the same code, and the cook's decision showing on the customer's page), per-visitor isolation, reset, corrupted and outdated storage, language switching, keyboard-only reservation, skip link and focus, disabled waitlist (asserts no request is made), the API refusing to store, security headers, no CSP violations, no third-party requests, and no horizontal overflow at 320/375/768px.
 - Manual review of the rendered pages at desktop, tablet and phone widths. Screenshots are in `docs/screenshots/`.
 
 Not verified: screen-reader output with real assistive technology (only the accessibility tree was inspected); Safari and Firefox; a real Supabase project or deployed hosting (no external services were contacted); the hosted Vercel environment's own header handling.
