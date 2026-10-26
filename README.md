@@ -69,6 +69,8 @@ Opens the app at http://localhost:3000 (redirects to `/it`).
 | `npm run test:e2e` | Browser tests (Playwright) against a production build on port 3100 |
 | `npm run check` | typecheck + lint + unit tests + build |
 | `npm run og-image` | Re-renders the social sharing image with a local Edge or Chrome |
+| `npm run preview` | Builds the Cloudflare Worker (OpenNext) and serves it locally in workerd |
+| `npm run deploy` | Builds the Cloudflare Worker and deploys it to hamiyami.com (needs `npx wrangler login`) |
 
 Browser tests need a Chromium browser. Either use an installed one:
 
@@ -206,7 +208,7 @@ The contracts in `src/data/contracts.ts` are the seam: screens and application f
 - [ ] Optionally set `SITE_URL` for sharing previews.
 - [ ] Keep `robots: noindex` (in `src/app/[locale]/layout.tsx`) unless you want the demo indexed.
 - [ ] Confirm the photo licences still suit your use (see [Images](#brand-assets-and-images)).
-- [ ] Deploy (e.g. Vercel). No secrets are needed.
+- [ ] Deploy with `npm run deploy`. No secrets are needed. The site runs as the `hamiyami` Cloudflare Worker (configured in `wrangler.jsonc`, built with `@opennextjs/cloudflare`), which also attaches `hamiyami.com` and `www.hamiyami.com` and sets `SITE_URL`.
 
 ### Before a real pilot
 
