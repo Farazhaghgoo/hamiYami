@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { MealDraft, OfferingDraft } from "@/data/contracts";
-import type { Meal } from "@/domain/catalog";
+import { PORTION_SIZE_LIMITS, type Meal } from "@/domain/catalog";
 import { allergenSchema, dietaryTagSchema } from "@/domain/food-info";
 import { sameText } from "@/domain/localized";
 import { schedulableRange } from "@/domain/menu-window";
@@ -47,6 +47,16 @@ export const mealFormSchema = z.object({
   title: text(3, 80),
   description: text(10, 400),
   portion: text(3, 120),
+  /** Optional weight or volume of a portion; empty means unknown. */
+  portionAmount: z
+    .string()
+    .trim()
+    .refine(
+      (v) =>
+        v === "" || (/^\d+$/.test(v) && Number(v) >= PORTION_SIZE_LIMITS.min && Number(v) <= PORTION_SIZE_LIMITS.max),
+      { error: "portion_size_range" },
+    ),
+  portionUnit: z.enum(["g", "ml"]),
   ingredients: text(3, 500),
   allergens: z.array(allergenSchema),
   mayContain: z.array(allergenSchema),
@@ -59,6 +69,8 @@ export const EMPTY_MEAL_FORM: MealFormValues = {
   title: "",
   description: "",
   portion: "",
+  portionAmount: "",
+  portionUnit: "g",
   ingredients: "",
   allergens: [],
   mayContain: [],
@@ -70,6 +82,8 @@ export function mealToForm(meal: Meal, locale: "it" | "en"): MealFormValues {
     title: meal.title[locale],
     description: meal.description[locale],
     portion: meal.portion[locale],
+    portionAmount: meal.portionSize ? String(meal.portionSize.amount) : "",
+    portionUnit: meal.portionSize?.unit ?? "g",
     ingredients: meal.ingredients[locale],
     allergens: meal.allergens,
     mayContain: meal.mayContain,
@@ -92,6 +106,9 @@ export function mealFormToDraft(values: z.output<typeof mealFormSchema>, existin
     mayContain: values.mayContain,
     dietary: values.dietary,
     image: existing?.image ?? null,
+    ...(values.portionAmount
+      ? { portionSize: { amount: Number(values.portionAmount), unit: values.portionUnit } }
+      : {}),
   };
 }
 

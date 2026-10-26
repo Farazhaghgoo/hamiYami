@@ -39,7 +39,7 @@ test.describe("browsing", () => {
 
     await page.getByRole("radio", { name: "Fino a 7,00 €" }).check();
     await expect(page.locator("article")).toHaveCount(2);
-    for (const price of await page.locator("article").getByText(/€/).allInnerTexts()) {
+    for (const price of await page.locator("article strong").allInnerTexts()) {
       expect(Number(price.replace(/[^\d,]/g, "").replace(",", "."))).toBeLessThanOrEqual(7);
     }
 
@@ -63,6 +63,10 @@ test.describe("browsing", () => {
       /Prenota entro (le \d{2}:\d{2}|.+, \d{2}:\d{2})/,
     );
     await expect(results.locator("article", { hasText: "Esaurito" }).first()).not.toContainText("Prenota entro");
+
+    // Portion size and price per 100 g sit next to the price, so dishes can be compared.
+    await expect(results.locator("article", { hasText: "Lasagna al ragù" }).first()).toContainText("350 g · 2,57 €/100 g");
+    await expect(results.locator("article", { hasText: "Minestrone" }).first()).toContainText("450 ml · 1,44 €/100 ml");
   });
 
   test("sorts by price across the week and offers price steps from the menu", async ({ page }) => {

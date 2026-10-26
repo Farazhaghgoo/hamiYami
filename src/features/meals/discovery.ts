@@ -1,5 +1,5 @@
 import type { CatalogRepository, OfferingSnapshot } from "@/data/contracts";
-import type { CookProfile, Meal, MealImage, Neighborhood } from "@/domain/catalog";
+import type { CookProfile, Meal, MealImage, Neighborhood, PortionSize } from "@/domain/catalog";
 import { dietaryTagSchema, type Allergen, type DietaryTag } from "@/domain/food-info";
 import type { LocalizedText } from "@/domain/localized";
 import type { MenuWindow } from "@/domain/menu-window";
@@ -25,6 +25,7 @@ export interface MealCardView {
     id: string;
     title: LocalizedText;
     image: MealImage | null;
+    portionSize?: PortionSize;
     dietary: DietaryTag[];
     allergens: Allergen[];
   };
@@ -119,6 +120,7 @@ export function toMealCard(
       id: meal.id,
       title: meal.title,
       image: meal.image,
+      ...(meal.portionSize ? { portionSize: meal.portionSize } : {}),
       dietary: meal.dietary,
       allergens: meal.allergens,
     },

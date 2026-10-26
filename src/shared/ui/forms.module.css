@@ -116,6 +116,7 @@
 
 .row {
   display: grid;
+  align-items: start;
   gap: var(--space-4);
 }
 

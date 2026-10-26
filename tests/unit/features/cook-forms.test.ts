@@ -3,6 +3,7 @@ import {
   collectIssues,
   EMPTY_MEAL_FORM,
   mealFormSchema,
+  mealFormToDraft,
   offeringFormSchema,
   offeringFormToDraft,
   type OfferingFormValues,
@@ -43,6 +44,24 @@ describe("meal form", () => {
       allergens: ["gluten", "milk"],
     });
     expect(result.success && result.data.title).toBe("Torta salata");
+  });
+
+  it("takes an optional portion weight or volume", () => {
+    const base = {
+      ...EMPTY_MEAL_FORM,
+      title: "Torta salata",
+      description: "Sfoglia con verdure di stagione.",
+      portion: "Una fetta",
+      ingredients: "Farina, spinaci, ricotta",
+    };
+    const withSize = mealFormSchema.parse({ ...base, portionAmount: " 250 ", portionUnit: "g" });
+    expect(mealFormToDraft(withSize, null).portionSize).toEqual({ amount: 250, unit: "g" });
+    expect(mealFormToDraft(mealFormSchema.parse(base), null)).not.toHaveProperty("portionSize");
+    for (const amount of ["5", "3001", "2,5", "abc"]) {
+      const result = mealFormSchema.safeParse({ ...base, portionAmount: amount });
+      expect(result.success, amount).toBe(false);
+      if (!result.success) expect(collectIssues(result.error).portionAmount?.code).toBe("portion_size_range");
+    }
   });
 
   it("rejects unknown allergens", () => {

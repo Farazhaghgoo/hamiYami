@@ -17,7 +17,8 @@ test.describe("cook workspace (simulation)", () => {
 
     await page.getByLabel("Nome del piatto").fill("Torta salata di verdure");
     await page.getByLabel("Descrizione").fill("Sfoglia croccante ripiena di spinaci e ricotta.");
-    await page.getByLabel("Porzione").fill("Una fetta da circa 250 g");
+    await page.getByLabel("Porzione", { exact: true }).fill("Una fetta da circa 250 g");
+    await page.getByLabel(/Peso o volume della porzione/).fill("250");
     await page.getByLabel("Ingredienti").fill("Pasta sfoglia, spinaci, ricotta, uova, Parmigiano Reggiano");
     await page.getByRole("checkbox", { name: "Cereali contenenti glutine" }).first().check();
     await page.getByRole("checkbox", { name: "Latte" }).first().check();
@@ -39,6 +40,8 @@ test.describe("cook workspace (simulation)", () => {
     await page.goto(`/it/meals?date=${date}`);
     const card = page.locator("article", { hasText: "Torta salata di verdure" });
     await expect(card).toContainText("7,50 €");
+    // 7,50 € for 250 g: customers can compare it at 3,00 € per 100 g.
+    await expect(card).toContainText("250 g · 3,00 €/100 g");
     await card.locator("h3 a").click();
     await expect(page.getByRole("heading", { level: 1, name: "Torta salata di verdure" })).toBeVisible();
     await expect(page.getByRole("img", { name: "Torta salata di verdure: Foto non disponibile" })).toBeVisible();

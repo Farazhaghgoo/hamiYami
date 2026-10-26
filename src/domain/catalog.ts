@@ -50,12 +50,22 @@ export const mealImageSchema = z.object({
 });
 export type MealImage = z.infer<typeof mealImageSchema>;
 
+/** Weight or volume of one portion, so customers can compare prices fairly. */
+export const PORTION_SIZE_LIMITS = { min: 20, max: 3000 } as const;
+export const portionSizeSchema = z.object({
+  amount: z.int().min(PORTION_SIZE_LIMITS.min).max(PORTION_SIZE_LIMITS.max),
+  unit: z.enum(["g", "ml"]),
+});
+export type PortionSize = z.infer<typeof portionSizeSchema>;
+
 export const mealSchema = z.object({
   id: idSchema,
   cookId: idSchema,
   title: localizedTextSchema,
   description: localizedTextSchema,
   portion: localizedTextSchema,
+  /** Optional: dishes saved before this field existed (or without a known size) leave it out. */
+  portionSize: portionSizeSchema.optional(),
   ingredients: localizedTextSchema,
   /** Allergens the recipe contains, as declared by the cook. */
   allergens: z.array(allergenSchema),

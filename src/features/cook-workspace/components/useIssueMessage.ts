@@ -37,6 +37,8 @@ export function useIssueMessage() {
         });
       case "invalid_integer":
         return v.invalidInteger;
+      case "portion_size_range":
+        return v.portionSizeRange;
       case "capacity_range":
         return v.capacityRange;
       case "max_per_reservation_range":

@@ -1,3 +1,6 @@
+import type { PortionSize } from "./catalog";
+import type { Money } from "./money";
+
 /*
  * Cooks set their own prices: HamiYami does not control them. These helpers only describe the
  * local market (so cooks and customers can compare) and catch likely typos, such as 85 € typed
@@ -27,4 +30,9 @@ export const MIN_PRICES_FOR_CHECK = 3;
 export function isUnusualPrice(amountCents: number, stats: PriceStats | null): boolean {
   if (!stats || stats.count < MIN_PRICES_FOR_CHECK) return false;
   return amountCents > stats.medianCents * UNUSUAL_PRICE_FACTOR || amountCents < stats.medianCents / UNUSUAL_PRICE_FACTOR;
+}
+
+/** Price per 100 g or 100 ml, rounded to the cent: the fair way to compare different portions. */
+export function unitPricePer100(price: Money, size: PortionSize): Money {
+  return { amountCents: Math.round((price.amountCents * 100) / size.amount), currency: price.currency };
 }

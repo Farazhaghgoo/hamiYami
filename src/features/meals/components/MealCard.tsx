@@ -7,6 +7,7 @@ import { Icon } from "@/shared/ui/Icon";
 import { MealImage } from "@/shared/ui/MealImage";
 import { reservationDeadline, type MealCardView } from "../discovery";
 import { AvailabilityBadge } from "./AvailabilityBadge";
+import { PortionSizeNote } from "./PortionSizeNote";
 import styles from "./MealCard.module.css";
 
 export function MealCard({
@@ -67,9 +68,12 @@ export function MealCard({
           </ul>
         ) : null}
         <div className={styles.footer}>
-          <p className={styles.price}>
-            <strong>{money(card.price)}</strong> <span>{t.common.perPortion}</span>
-          </p>
+          <div className={styles.priceBlock}>
+            <p className={styles.price}>
+              <strong>{money(card.price)}</strong> <span>{t.common.perPortion}</span>
+            </p>
+            <PortionSizeNote size={card.meal.portionSize} price={card.price} className={styles.size} />
+          </div>
           <AvailabilityBadge availability={card.availability} />
         </div>
       </div>

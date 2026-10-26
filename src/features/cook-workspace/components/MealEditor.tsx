@@ -9,7 +9,7 @@ import { ALLERGENS, DIETARY_TAGS } from "@/domain/food-info";
 import { useI18n } from "@/i18n/I18nProvider";
 import { buttonClass } from "@/shared/ui/button";
 import { ErrorSummary } from "@/shared/ui/ErrorSummary";
-import { ChoiceGroup, TextAreaField, TextField, formStyles } from "@/shared/ui/fields";
+import { ChoiceGroup, SelectField, TextAreaField, TextField, formStyles } from "@/shared/ui/fields";
 import { Icon } from "@/shared/ui/Icon";
 import { Notice } from "@/shared/ui/Notice";
 import {
@@ -29,6 +29,8 @@ const FIELD_IDS: Record<MealField, string> = {
   title: "meal-title",
   description: "meal-description",
   portion: "meal-portion",
+  portionAmount: "meal-portion-amount",
+  portionUnit: "meal-portion-unit",
   ingredients: "meal-ingredients",
   allergens: "meal-allergens",
   mayContain: "meal-may-contain",
@@ -80,6 +82,8 @@ function MealForm({ meal }: { meal: Meal | null }) {
       title: t.mealForm.name,
       description: t.mealForm.description,
       portion: t.mealForm.portion,
+      portionAmount: t.mealForm.portionAmount,
+      portionUnit: t.mealForm.portionUnit,
       ingredients: t.mealForm.ingredients,
       allergens: t.mealForm.allergens,
       mayContain: t.mealForm.mayContain,
@@ -142,6 +146,37 @@ function MealForm({ meal }: { meal: Meal | null }) {
           onChange={(e) => set("portion", e.target.value)}
           error={message("portion")}
         />
+        <div className={formStyles.row}>
+          <TextField
+            id={FIELD_IDS.portionAmount}
+            label={t.mealForm.portionAmount}
+            optionalLabel={t.common.optional}
+            // The hint sits under both fields, so it is linked here by hand.
+            aria-describedby={["meal-portion-size-hint", issues.portionAmount ? `${FIELD_IDS.portionAmount}-error` : ""]
+              .filter(Boolean)
+              .join(" ")}
+            type="number"
+            inputMode="numeric"
+            min={20}
+            max={3000}
+            value={values.portionAmount}
+            onChange={(e) => set("portionAmount", e.target.value)}
+            error={message("portionAmount")}
+          />
+          <SelectField
+            id={FIELD_IDS.portionUnit}
+            label={t.mealForm.portionUnit}
+            value={values.portionUnit}
+            onChange={(e) => set("portionUnit", e.target.value === "ml" ? "ml" : "g")}
+            error={message("portionUnit")}
+          >
+            <option value="g">{t.mealForm.unitG}</option>
+            <option value="ml">{t.mealForm.unitMl}</option>
+          </SelectField>
+        </div>
+        <p id="meal-portion-size-hint" className={formStyles.hint}>
+          {t.mealForm.portionSizeHint}
+        </p>
         <TextAreaField
           id={FIELD_IDS.ingredients}
           label={t.mealForm.ingredients}

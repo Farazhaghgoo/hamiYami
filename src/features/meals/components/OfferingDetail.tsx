@@ -18,6 +18,7 @@ import { QuantityStepper } from "@/shared/ui/QuantityStepper";
 import { getOfferingDetail, type OfferingDetailView } from "../detail";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { FoodInfo } from "./FoodInfo";
+import { PortionSizeNote } from "./PortionSizeNote";
 import { useQuantityMessage } from "./useQuantityMessage";
 import styles from "./OfferingDetail.module.css";
 
@@ -82,9 +83,12 @@ export function OfferingDetail({
           <h2 id="reserve-title" className="visually-hidden">
             {t.detail.priceTitle}
           </h2>
-          <p className={styles.price}>
-            <strong>{money(offering.price)}</strong> {t.common.perPortion}
-          </p>
+          <div>
+            <p className={styles.price}>
+              <strong>{money(offering.price)}</strong> {t.common.perPortion}
+            </p>
+            <PortionSizeNote size={meal.portionSize} price={offering.price} className={styles.small} />
+          </div>
           <dl className={styles.facts}>
             <div>
               <dt>

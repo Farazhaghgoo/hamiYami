@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { eur } from "@/domain/money";
 import { offeringSchema, OFFERING_LIMITS } from "@/domain/offering";
-import { isUnusualPrice, priceStats } from "@/domain/pricing";
+import { mealSchema } from "@/domain/catalog";
+import { isUnusualPrice, priceStats, unitPricePer100 } from "@/domain/pricing";
 
 describe("open pricing", () => {
   it("accepts any price inside wide technical bounds", () => {
@@ -42,5 +43,32 @@ describe("open pricing", () => {
     expect(isUnusualPrice(450, stats)).toBe(false);
     expect(isUnusualPrice(8500, priceStats([800, 900]))).toBe(false);
     expect(isUnusualPrice(8500, null)).toBe(false);
+  });
+});
+
+describe("comparing portions", () => {
+  it("gives the price per 100 g or 100 ml, rounded to the cent", () => {
+    expect(unitPricePer100(eur(900), { amount: 350, unit: "g" })).toEqual(eur(257));
+    expect(unitPricePer100(eur(650), { amount: 450, unit: "ml" })).toEqual(eur(144));
+    expect(unitPricePer100(eur(750), { amount: 250, unit: "g" })).toEqual(eur(300));
+  });
+
+  it("keeps portion size optional, so dishes saved before it existed still load", () => {
+    const meal = {
+      id: "local_meal_1",
+      cookId: "cook-marta",
+      title: { it: "Torta", en: "Torta" },
+      description: { it: "Una torta salata.", en: "Una torta salata." },
+      portion: { it: "Una fetta", en: "Una fetta" },
+      ingredients: { it: "Farina", en: "Farina" },
+      allergens: [],
+      mayContain: [],
+      dietary: [],
+      image: null,
+    };
+    expect(mealSchema.safeParse(meal).success).toBe(true);
+    expect(mealSchema.safeParse({ ...meal, portionSize: { amount: 250, unit: "g" } }).success).toBe(true);
+    expect(mealSchema.safeParse({ ...meal, portionSize: { amount: 5, unit: "g" } }).success).toBe(false);
+    expect(mealSchema.safeParse({ ...meal, portionSize: { amount: 250, unit: "kg" } }).success).toBe(false);
   });
 });

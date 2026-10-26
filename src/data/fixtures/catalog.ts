@@ -91,6 +91,7 @@ export const meals: Meal[] = [
       en: "Fresh egg pasta layered with slow-cooked ragù and creamy béchamel, baked until golden at the edges.",
     },
     portion: { it: "Circa 350 g, una porzione da cena", en: "About 350 g, one dinner portion" },
+    portionSize: { amount: 350, unit: "g" },
     ingredients: {
       it: "Pasta fresca all'uovo (farina di grano tenero, uova), ragù di manzo e maiale (pomodoro, cipolla, carota, sedano), besciamella (latte, burro, farina di grano tenero), Parmigiano Reggiano.",
       en: "Fresh egg pasta (soft wheat flour, eggs), beef and pork ragù (tomato, onion, carrot, celery), béchamel (milk, butter, soft wheat flour), Parmigiano Reggiano.",
@@ -117,6 +118,7 @@ export const meals: Meal[] = [
       en: "Beef meatballs simmered slowly in tomato sauce, with a slice of homemade bread.",
     },
     portion: { it: "Sei polpette con sugo e pane, circa 400 g", en: "Six meatballs with sauce and bread, about 400 g" },
+    portionSize: { amount: 400, unit: "g" },
     ingredients: {
       it: "Carne macinata di manzo, pane (farina di grano tenero), uova, Parmigiano Reggiano, prezzemolo, aglio, passata di pomodoro, cipolla, olio extravergine d'oliva.",
       en: "Minced beef, bread (soft wheat flour), eggs, Parmigiano Reggiano, parsley, garlic, tomato passata, onion, extra virgin olive oil.",
@@ -135,6 +137,7 @@ export const meals: Meal[] = [
       en: "Sweet peppers filled with rice, tomato, herbs and cheese, baked until golden.",
     },
     portion: { it: "Due mezzi peperoni, circa 350 g", en: "Two pepper halves, about 350 g" },
+    portionSize: { amount: 350, unit: "g" },
     ingredients: {
       it: "Peperoni rossi e gialli, riso, pomodoro, cipolla, mozzarella, Parmigiano Reggiano, uovo, aglio, prezzemolo, basilico, olio extravergine d'oliva.",
       en: "Red and yellow peppers, rice, tomato, onion, mozzarella, Parmigiano Reggiano, egg, garlic, parsley, basil, extra virgin olive oil.",
@@ -161,6 +164,7 @@ export const meals: Meal[] = [
       en: "A thick soup of seasonal vegetables, borlotti beans and small pasta.",
     },
     portion: { it: "Una ciotola da circa 450 ml", en: "One bowl, about 450 ml" },
+    portionSize: { amount: 450, unit: "ml" },
     ingredients: {
       it: "Fagioli borlotti, carote, sedano, zucchine, patate, cavolo, pomodoro, cipolla, pastina di semola di grano duro, olio extravergine d'oliva.",
       en: "Borlotti beans, carrots, celery, courgette, potato, cabbage, tomato, onion, small durum wheat pasta, extra virgin olive oil.",
@@ -179,6 +183,7 @@ export const meals: Meal[] = [
       en: "Chickpeas and seasonal vegetables simmered in a gently spiced, creamy tomato sauce.",
     },
     portion: { it: "Circa 400 g, con riso basmati", en: "About 400 g, with basmati rice" },
+    portionSize: { amount: 400, unit: "g" },
     ingredients: {
       it: "Ceci, zucca, cavolo nero, pomodori, cipolla, latte di cocco, aglio, zenzero, semi di senape, cumino, curcuma, coriandolo, riso basmati.",
       en: "Chickpeas, butternut squash, kale, tomatoes, onion, coconut milk, garlic, ginger, mustard seeds, cumin, turmeric, coriander, basmati rice.",
@@ -205,6 +210,7 @@ export const meals: Meal[] = [
       en: "Red lentils cooked with carrot and cumin, finished with a squeeze of lemon.",
     },
     portion: { it: "Una ciotola da circa 450 ml", en: "One bowl, about 450 ml" },
+    portionSize: { amount: 450, unit: "ml" },
     ingredients: {
       it: "Lenticchie rosse, carota, cipolla, sedano, aglio, cumino, curcuma, limone, olio extravergine d'oliva.",
       en: "Red lentils, carrot, onion, celery, garlic, cumin, turmeric, lemon, extra virgin olive oil.",
