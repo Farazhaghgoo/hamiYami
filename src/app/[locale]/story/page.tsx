@@ -11,6 +11,7 @@ import { Scrolly } from "@/features/story/components/Scrolly";
 import { MenuWeek, PriceStrip, ReservedMeters, StatTiles, UnitPriceBars } from "@/features/story/components/StoryCharts";
 import { DishesTable, EveningsTable, OfferingsTable } from "@/features/story/components/StoryTables";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { buttonClass } from "@/shared/ui/button";
 import { Icon } from "@/shared/ui/Icon";
 import { Notice } from "@/shared/ui/Notice";
@@ -24,8 +25,9 @@ import styles from "./story.module.css";
  */
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/story">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: t.story.title, description: t.story.description };
+  const i18n = await getI18n(params);
+  const { t } = i18n;
+  return pageMetadata(i18n, "/story", { title: t.story.title, description: t.story.description });
 }
 
 const PAST_PHOTOS = [

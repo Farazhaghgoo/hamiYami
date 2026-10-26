@@ -6,10 +6,13 @@ import { menuWindow } from "@/domain/menu-window";
 import { getOfferingDetail } from "@/features/meals/detail";
 import { ReserveFlow } from "@/features/reservations/components/ReserveFlow";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/meals/[offeringId]/reserve">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: t.reserve.steps.join(" · ") };
+  const i18n = await getI18n(params);
+  const { offeringId } = await params;
+  const { t } = i18n;
+  return pageMetadata(i18n, `/meals/${offeringId}/reserve`, { title: t.reserve.steps.join(" · "), description: t.reserve.demoNotice, index: false });
 }
 
 export default async function ReservePage({ params }: PageProps<"/[locale]/meals/[offeringId]/reserve">) {

@@ -7,13 +7,20 @@ import { menuWindow } from "@/domain/menu-window";
 import { getOfferingDetail } from "@/features/meals/detail";
 import { OfferingDetail } from "@/features/meals/components/OfferingDetail";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/meals/[offeringId]">): Promise<Metadata> {
-  const { locale, t } = await getI18n(params);
+  const i18n = await getI18n(params);
+  const { locale, t } = i18n;
   const { offeringId } = await params;
   const { anchor, catalog } = getServerCatalog();
   const detail = await getOfferingDetail(catalog, offeringId, menuWindow(anchor), new Date());
-  return { title: detail ? pickText(detail.meal.title, locale) : t.detail.notFoundTitle };
+  // Each page is one dated (fictional) offering that disappears within a week: kept out of the index.
+  return pageMetadata(i18n, `/meals/${offeringId}`, {
+    title: detail ? pickText(detail.meal.title, locale) : t.detail.notFoundTitle,
+    description: detail ? pickText(detail.meal.description, locale) : t.detail.notFoundText,
+    index: false,
+  });
 }
 
 export default async function OfferingPage({ params }: PageProps<"/[locale]/meals/[offeringId]">) {

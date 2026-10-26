@@ -208,7 +208,7 @@ The contracts in `src/data/contracts.ts` are the seam: screens and application f
 - [ ] `npm run check` and `npm run test:e2e` pass.
 - [ ] `WAITLIST_COLLECTION_ENABLED` unset or `false` (the default).
 - [ ] Optionally set `SITE_URL` for sharing previews.
-- [ ] Keep `robots: noindex` (in `src/app/[locale]/layout.tsx`) unless you want the demo indexed.
+- [ ] Indexing: public pages opt in through `pageMetadata()` (`src/shared/seo/metadata.ts`); single meal dates, reservations and the cook workspace stay `noindex`. `sitemap.xml`, `robots.txt` and `llms.txt` are generated from the list in `src/shared/seo/public-pages.ts`, so add new public pages there.
 - [ ] Confirm the photo licences still suit your use (see [Images](#brand-assets-and-images)).
 - [ ] Deploy with `npm run deploy`. No secrets are needed. The site runs as the `hamiyami` Cloudflare Worker (configured in `wrangler.jsonc`, built with `@opennextjs/cloudflare`), which also attaches `hamiyami.com` and `www.hamiyami.com` and sets `SITE_URL`.
 
@@ -224,7 +224,7 @@ The contracts in `src/data/contracts.ts` are the seam: screens and application f
 - [ ] Cook onboarding that verifies applicable food-business requirements; terms for cooks and customers; allergen information procedures.
 - [ ] Payment provider (if used), refunds and cancellation policy.
 - [ ] Monitoring, backups, incident and recall procedures, data retention.
-- [ ] Remove the fictional catalog, demo banner and demo storage, and remove `noindex`.
+- [ ] Remove the fictional catalog, demo banner and demo storage, and review which pages stay `noindex`.
 
 ## Content rules
 

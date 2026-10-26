@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { PageHeader } from "@/shared/layout/PageHeader";
 import { buttonClass } from "@/shared/ui/button";
 import { Icon, type IconName } from "@/shared/ui/Icon";
@@ -19,8 +20,9 @@ import styles from "../content.module.css";
  */
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/trust">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: t.trust.title };
+  const i18n = await getI18n(params);
+  const { t } = i18n;
+  return pageMetadata(i18n, "/trust", { title: t.trust.title, description: t.trust.metaDescription });
 }
 
 const CARD_ICONS: IconName[] = ["docSearch", "thermometer", "tag", "bell"];

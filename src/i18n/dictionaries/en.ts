@@ -308,6 +308,13 @@ export const en: Dictionary = {
   reservations: {
     title: "My demo reservations",
     lead: "The simulated reservations you've made in this browser. None was sent to a cook.",
+    howTitle: "How demo reservations work",
+    how: [
+      "Choose a meal, how many portions and a pickup time, then confirm: no sign-up and nothing to pay.",
+      "Each reservation gets a pickup code, and you can add the pickup time to your calendar.",
+      "You can cancel until reservations for that date close.",
+      "Reservations are saved only in this browser and never reach a cook. Resetting the demo deletes them.",
+    ],
     emptyTitle: "No demo reservations",
     emptyText: "Choose a meal and try reserving it: no sign-up needed and nothing to pay.",
     emptyCta: "Explore meals",
@@ -334,6 +341,7 @@ export const en: Dictionary = {
   },
   cook: {
     eyebrow: "Cook profile",
+    metaTitle: "{name} — demo cook profile",
     fictionalNotice:
       "This profile was invented for the demo. It doesn't represent a real person and hasn't completed any checks.",
     style: "Cooking style",
@@ -349,6 +357,14 @@ export const en: Dictionary = {
   workspace: {
     title: "Cook workspace — simulation",
     lead: "Try how a cook would manage dishes, dates and reservations. You're simulating Marta's fictional profile.",
+    tryTitle: "What you can try",
+    tryItems: [
+      "Create a dish with its ingredients, allergens and portion size.",
+      "Schedule pickup dates with a price, the portions available and when reservations close.",
+      "Publish or unpublish a date, and see it among the meals as customers would.",
+      "Confirm or decline sample reservations, and mark pickups as collected or not collected.",
+      "See day by day how many portions to prepare.",
+    ],
     simulationNoticeTitle: "A simulation, not a sign-in.",
     simulationNotice:
       "There's no login or identity check here: anyone can try this page and changes stay in your browser. The real cook workspace will require authentication and server-side checks.",
@@ -396,6 +412,8 @@ export const en: Dictionary = {
   },
   mealForm: {
     createTitle: "New dish",
+    metaTitle: "New dish — demo cook workspace",
+    lead: "Describe a dish once, with its ingredients, allergens and portion, then schedule it on the dates you choose. Changes stay in this browser.",
     editTitle: "Edit dish",
     name: "Dish name",
     description: "Description",
@@ -422,6 +440,8 @@ export const en: Dictionary = {
   },
   offeringForm: {
     createTitle: "New date",
+    metaTitle: "New pickup date — demo cook workspace",
+    lead: "Choose a dish, a pickup day and time window, the price and how many portions you'll prepare. Published dates appear among the demo meals in this browser only.",
     editTitle: "Edit date",
     meal: "Dish",
     mealPlaceholder: "Choose a dish",
@@ -482,6 +502,7 @@ export const en: Dictionary = {
   },
   waitlist: {
     title: "Waitlist",
+    metaTitle: "Join the waitlist",
     lead: "Tell us where you'd use HamiYami. Interest from customers and cooks will help us decide where to start.",
     disabledTitle: "Signup collection isn't live yet.",
     disabledText:
@@ -544,6 +565,7 @@ export const en: Dictionary = {
   trust: {
     title: "Trust and food safety",
     eyebrow: "Our planned approach",
+    metaDescription: "How HamiYami plans to handle food safety: checks on providers, documented preparation and orders traced to batches, tested first in a small pilot.",
     heroTitle: "Good food starts with trust.",
     heroLead:
       "We're designing HamiYami around clear provider checks, documented food preparation, and traceable orders. Our first pilot will help us test and improve these processes before we grow.",
@@ -740,6 +762,7 @@ export const en: Dictionary = {
   },
   privacy: {
     title: "Privacy notice",
+    description: "HamiYami's privacy notice is being prepared. Meanwhile, here's what this demo does: no analytics, no third-party requests, demo data kept in your browser.",
     statusTitle: "Not published yet.",
     status: "We're preparing our privacy notice. We won't collect signups through this website until it's available here.",
     lead: "It will explain who is responsible for your information, why we use it, which service providers help us, how long we keep it, and how to exercise your rights.",
@@ -749,6 +772,26 @@ export const en: Dictionary = {
       "It loads fonts and images from this site only, with no third-party requests.",
       "It saves your demo tries only in your browser (localStorage), with no personal data.",
       "The waitlist form sends no data until collection is switched on.",
+    ],
+    waitlistTitle: "What the waitlist form will ask for",
+    waitlistText: "When collection is switched on, the form will ask for:",
+    waitlistFields: [
+      "Your email address and your city or town in Italy.",
+      "Optionally, your neighborhood or area.",
+      "If you want to find meals: which meals you'd love to find (optional).",
+      "If you want to cook: what you'd like to cook and, optionally, your food-business experience.",
+      "Optionally, your consent to receive news from HamiYami.",
+    ],
+    waitlistNote: "Collection stays off until a full privacy notice is published on this page.",
+    deleteTitle: "Deleting your demo data",
+    deleteText: "Use “Reset the demo” in the banner at the top of every page to delete the demo reservations and cook workspace changes saved in this browser. Clearing this site's data in your browser settings has the same effect.",
+    coverTitle: "What the full notice will cover",
+    cover: [
+      "Who is responsible for your data, and how to contact them.",
+      "Why we use your data, and on what legal basis.",
+      "Which service providers help us, and any transfers outside the EU.",
+      "How long we keep your data.",
+      "Your rights, including the right to complain to the Garante per la protezione dei dati personali.",
     ],
     back: "Back to HamiYami",
   },

@@ -314,6 +314,13 @@ export const it = {
   reservations: {
     title: "Le mie prenotazioni demo",
     lead: "Le prenotazioni simulate che hai fatto in questo browser. Nessuna è stata inviata a un cuoco.",
+    howTitle: "Come funzionano le prenotazioni demo",
+    how: [
+      "Scegli un pasto, quante porzioni e un orario di ritiro, poi conferma: niente registrazione e niente da pagare.",
+      "Ogni prenotazione riceve un codice di ritiro e puoi aggiungere l'orario di ritiro al tuo calendario.",
+      "Puoi annullare finché le prenotazioni per quella data non si chiudono.",
+      "Le prenotazioni restano salvate solo in questo browser e non arrivano a nessun cuoco. Azzerando la demo vengono cancellate.",
+    ],
     emptyTitle: "Nessuna prenotazione demo",
     emptyText: "Scegli un pasto e prova la prenotazione: non serve registrarsi e non si paga nulla.",
     emptyCta: "Esplora i pasti",
@@ -340,6 +347,7 @@ export const it = {
   },
   cook: {
     eyebrow: "Profilo cuoco",
+    metaTitle: "{name} — profilo cuoco demo",
     fictionalNotice:
       "Questo è un profilo inventato per la demo. Non rappresenta una persona reale e non ha completato alcuna verifica.",
     style: "Stile di cucina",
@@ -355,6 +363,14 @@ export const it = {
   workspace: {
     title: "Area cuoco — simulazione",
     lead: "Prova come un cuoco gestirebbe piatti, date e prenotazioni. Stai simulando il profilo fittizio di Marta.",
+    tryTitle: "Cosa puoi provare",
+    tryItems: [
+      "Creare un piatto con ingredienti, allergeni e porzione.",
+      "Programmare date di ritiro con prezzo, porzioni disponibili e chiusura delle prenotazioni.",
+      "Pubblicare o ritirare una data, e vederla tra i pasti come la vedrebbero i clienti.",
+      "Confermare o rifiutare prenotazioni d'esempio, e segnare i ritiri come avvenuti o mancati.",
+      "Vedere giorno per giorno quante porzioni preparare.",
+    ],
     simulationNoticeTitle: "Simulazione, non un accesso.",
     simulationNotice:
       "Qui non c'è login né controllo di identità: chiunque può provare questa pagina e le modifiche restano nel tuo browser. Nella versione reale l'area cuoco richiederà autenticazione e controlli lato server.",
@@ -402,6 +418,8 @@ export const it = {
   },
   mealForm: {
     createTitle: "Nuovo piatto",
+    metaTitle: "Nuovo piatto — area cuoco demo",
+    lead: "Descrivi un piatto una volta sola, con ingredienti, allergeni e porzione, poi programmalo nelle date che preferisci. Le modifiche restano in questo browser.",
     editTitle: "Modifica piatto",
     name: "Nome del piatto",
     description: "Descrizione",
@@ -429,6 +447,8 @@ export const it = {
   },
   offeringForm: {
     createTitle: "Nuova data",
+    metaTitle: "Nuova data di ritiro — area cuoco demo",
+    lead: "Scegli un piatto, il giorno e la fascia oraria di ritiro, il prezzo e quante porzioni preparerai. Le date pubblicate compaiono tra i pasti della demo solo in questo browser.",
     editTitle: "Modifica data",
     meal: "Piatto",
     mealPlaceholder: "Scegli un piatto",
@@ -489,6 +509,7 @@ export const it = {
   },
   waitlist: {
     title: "Lista d'attesa",
+    metaTitle: "Iscriviti alla lista d'attesa",
     lead: "Dicci dove useresti HamiYami. L'interesse di clienti e cuochi ci aiuterà a scegliere dove partire.",
     disabledTitle: "La raccolta delle iscrizioni non è ancora attiva.",
     disabledText:
@@ -551,6 +572,7 @@ export const it = {
   trust: {
     title: "Fiducia e sicurezza alimentare",
     eyebrow: "Il nostro approccio previsto",
+    metaDescription: "Come HamiYami intende gestire la sicurezza alimentare: controlli sui fornitori, preparazioni documentate e ordini legati ai lotti, da provare in un pilota.",
     heroTitle: "Il buon cibo comincia dalla fiducia.",
     heroLead:
       "Stiamo progettando HamiYami intorno a controlli chiari sui fornitori, preparazioni documentate e ordini tracciabili. Il primo pilota ci aiuterà a verificare e migliorare questi processi prima di crescere.",
@@ -747,6 +769,7 @@ export const it = {
   },
   privacy: {
     title: "Informativa privacy",
+    description: "L'informativa privacy di HamiYami è in preparazione. Intanto, ecco cosa fa questa demo: niente analisi, niente richieste a terzi, dati demo solo nel browser.",
     statusTitle: "Non ancora pubblicata.",
     status:
       "Stiamo preparando la nostra informativa privacy. Non raccoglieremo iscrizioni tramite questo sito finché non sarà disponibile qui.",
@@ -757,6 +780,26 @@ export const it = {
       "Carica caratteri e immagini dal nostro stesso sito, senza richieste a terze parti.",
       "Salva le prove della demo solo nel tuo browser (localStorage), senza dati personali.",
       "Il modulo della lista d'attesa non invia dati finché la raccolta non sarà attivata.",
+    ],
+    waitlistTitle: "Cosa chiederà il modulo della lista d'attesa",
+    waitlistText: "Quando la raccolta sarà attiva, il modulo chiederà:",
+    waitlistFields: [
+      "Il tuo indirizzo email e la tua città o il tuo comune in Italia.",
+      "Facoltativamente, il tuo quartiere o la tua zona.",
+      "Se vuoi trovare pasti: quali pasti ti piacerebbe trovare (facoltativo).",
+      "Se vuoi cucinare: cosa ti piacerebbe cucinare e, facoltativamente, la tua esperienza nel settore alimentare.",
+      "Facoltativamente, il consenso a ricevere notizie da HamiYami.",
+    ],
+    waitlistNote: "La raccolta resterà disattivata finché un'informativa privacy completa non sarà pubblicata in questa pagina.",
+    deleteTitle: "Cancellare i dati della demo",
+    deleteText: "Usa “Azzera la demo” nel banner in cima a ogni pagina per cancellare le prenotazioni demo e le modifiche all'area cuoco salvate in questo browser. Cancellare i dati di questo sito dalle impostazioni del browser ha lo stesso effetto.",
+    coverTitle: "Cosa conterrà l'informativa completa",
+    cover: [
+      "Chi è responsabile dei tuoi dati e come contattarlo.",
+      "Perché usiamo i tuoi dati e su quale base giuridica.",
+      "Quali fornitori ci aiutano, ed eventuali trasferimenti fuori dall'UE.",
+      "Per quanto tempo conserviamo i tuoi dati.",
+      "I tuoi diritti, compreso quello di presentare reclamo al Garante per la protezione dei dati personali.",
     ],
     back: "Torna a HamiYami",
   },

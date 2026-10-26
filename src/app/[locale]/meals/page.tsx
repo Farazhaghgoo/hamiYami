@@ -4,12 +4,14 @@ import { menuWindow } from "@/domain/menu-window";
 import { DiscoveryView } from "@/features/meals/components/DiscoveryView";
 import { discoverMeals, parseDiscoveryFilters } from "@/features/meals/discovery";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { PageHeader } from "@/shared/layout/PageHeader";
 import { Notice } from "@/shared/ui/Notice";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/meals">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: t.meals.title };
+  const i18n = await getI18n(params);
+  const { t } = i18n;
+  return pageMetadata(i18n, "/meals", { title: t.meals.title, description: t.meals.lead });
 }
 
 export default async function MealsPage({ params, searchParams }: PageProps<"/[locale]/meals">) {

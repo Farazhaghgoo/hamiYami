@@ -3,14 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { WaitlistForm } from "@/features/waitlist/components/WaitlistForm";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { isWaitlistCollectionEnabled } from "@/server/waitlist";
 import { buttonClass } from "@/shared/ui/button";
 import { Icon, type IconName } from "@/shared/ui/Icon";
 import styles from "../content.module.css";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/become-a-cook">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: t.becomeCook.title };
+  const i18n = await getI18n(params);
+  const { t } = i18n;
+  return pageMetadata(i18n, "/become-a-cook", { title: t.becomeCook.title, description: t.becomeCook.heroLead });
 }
 
 const STEP_ICONS: IconName[] = ["pot", "calendar", "bag"];

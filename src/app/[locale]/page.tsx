@@ -6,13 +6,15 @@ import { menuWindow } from "@/domain/menu-window";
 import { featuredMeals } from "@/features/meals/discovery";
 import { FeaturedMeals } from "@/features/meals/components/FeaturedMeals";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { buttonClass } from "@/shared/ui/button";
 import { Icon, type IconName } from "@/shared/ui/Icon";
 import styles from "./home.module.css";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: { absolute: `HamiYami — ${t.home.title}` } };
+  const i18n = await getI18n(params);
+  const { t } = i18n;
+  return pageMetadata(i18n, "/", { title: { absolute: `HamiYami — ${t.home.title}` }, description: t.meta.siteDescription });
 }
 
 const STEP_ICONS: IconName[] = ["search", "calendar", "bag"];

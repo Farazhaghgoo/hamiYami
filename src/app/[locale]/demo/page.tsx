@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { PageHeader } from "@/shared/layout/PageHeader";
 import { ResetDemoButton } from "@/shared/layout/ResetDemoButton";
 import { buttonClass } from "@/shared/ui/button";
@@ -8,8 +9,9 @@ import { Icon } from "@/shared/ui/Icon";
 import styles from "../content.module.css";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/demo">): Promise<Metadata> {
-  const { t } = await getI18n(params);
-  return { title: t.aboutDemo.title };
+  const i18n = await getI18n(params);
+  const { t } = i18n;
+  return pageMetadata(i18n, "/demo", { title: t.aboutDemo.title, description: t.aboutDemo.lead });
 }
 
 export default async function AboutDemoPage({ params }: PageProps<"/[locale]/demo">) {

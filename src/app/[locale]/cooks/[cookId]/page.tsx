@@ -6,14 +6,20 @@ import { menuWindow } from "@/domain/menu-window";
 import { CookUpcoming } from "@/features/cooks/components/CookUpcoming";
 import { getCookProfile } from "@/features/cooks/profile";
 import { getI18n } from "@/i18n/server";
+import { pageMetadata } from "@/shared/seo/metadata";
 import { Notice } from "@/shared/ui/Notice";
 import styles from "./cook.module.css";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/cooks/[cookId]">): Promise<Metadata> {
+  const i18n = await getI18n(params);
   const { cookId } = await params;
   const { catalog } = getServerCatalog();
   const cook = await catalog.getCook(cookId);
-  return { title: cook?.displayName };
+  if (!cook) return {};
+  return pageMetadata(i18n, `/cooks/${cookId}`, {
+    title: i18n.format(i18n.t.cook.metaTitle, { name: cook.displayName }),
+    description: pickText(cook.bio, i18n.locale),
+  });
 }
 
 export default async function CookPage({ params }: PageProps<"/[locale]/cooks/[cookId]">) {
