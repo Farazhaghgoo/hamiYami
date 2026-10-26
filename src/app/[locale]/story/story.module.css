@@ -1,0 +1,356 @@
+.page {
+  --night: #28251f;
+  --night-muted: #d9cdbd;
+  --night-accent: #e8806f; /* tomato lifted for dark backgrounds: 5.6:1 on --night */
+}
+
+/* Reading progress: a thin bar that fills as the page scrolls, where browsers support it. */
+.progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .progress {
+      position: fixed;
+      z-index: 50;
+      inset: 0 0 auto;
+      display: block;
+      height: 4px;
+      background: var(--color-tomato);
+      transform-origin: 0 50%;
+      animation: progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Hero */
+.hero {
+  overflow: clip;
+  padding-block: var(--space-7) var(--space-5);
+  border-bottom: 1px solid var(--color-line);
+  background:
+    radial-gradient(circle at 85% 20%, rgb(186 57 43 / 0.1), transparent 45%),
+    var(--color-cream-deep);
+}
+
+.heroGrid {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    min-height: calc(80svh - var(--header-h));
+  }
+}
+
+.heroCopy {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.eyebrow {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-green-soft);
+  color: var(--color-green-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.heroTitle {
+  font-size: clamp(2.5rem, 1.3rem + 4.6vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.heroLead {
+  max-width: 34em;
+  color: var(--color-ink-muted);
+  font-size: var(--text-lg);
+}
+
+.chapters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.chapterLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 16px 6px 6px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-charcoal);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.chapterLink:hover {
+  border-color: var(--color-tomato);
+}
+
+.chapterNumber {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-tomato);
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.collage {
+  position: relative;
+  height: clamp(250px, 62vw, 500px);
+}
+
+.collage img {
+  position: absolute;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 6px solid var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.collage img:nth-child(1) {
+  z-index: 2;
+  top: 12%;
+  left: 0;
+  width: 66%;
+  rotate: -3deg;
+}
+
+.collage img:nth-child(2) {
+  top: 0;
+  right: 2%;
+  width: 48%;
+  rotate: 4deg;
+}
+
+.collage img:nth-child(3) {
+  z-index: 3;
+  right: 8%;
+  bottom: 2%;
+  width: 50%;
+  rotate: -2deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .collage img {
+    animation: settle 900ms var(--ease) both;
+  }
+
+  .collage img:nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  .collage img:nth-child(3) {
+    animation-delay: 240ms;
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+  }
+}
+
+.scrollCue {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-5);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.scrollCue:hover {
+  color: var(--color-tomato-ink);
+}
+
+.scrollCueIcon {
+  rotate: 90deg;
+}
+
+/* Chapters */
+.chapter {
+  padding-block: var(--section-pad);
+  scroll-margin-top: var(--header-h);
+}
+
+.past {
+  background: var(--color-cream);
+}
+
+.present {
+  background: var(--night);
+  color: var(--color-cream);
+}
+
+.solution {
+  background: var(--color-cream-deep);
+}
+
+.chapterHead {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 720px;
+  margin-bottom: var(--space-6);
+}
+
+.chapterLabel {
+  color: var(--color-tomato-ink);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chapterTitle {
+  font-size: clamp(2.3rem, 1.4rem + 3.6vw, 3.9rem);
+  line-height: 1.04;
+}
+
+.chapterLead {
+  color: var(--color-ink-muted);
+  font-size: var(--text-lg);
+}
+
+.present .chapterLabel {
+  color: var(--night-accent);
+}
+
+.present .chapterTitle {
+  color: var(--color-cream);
+}
+
+.present .chapterLead {
+  color: var(--night-muted);
+}
+
+.present :focus-visible {
+  outline-color: var(--color-cream);
+}
+
+.stepTitle {
+  font-size: var(--text-xl);
+}
+
+.tag {
+  justify-self: start;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: rgb(232 128 111 / 0.16);
+  color: #f4b1a4;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.presentNote {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 640px;
+  margin-top: var(--space-6);
+  color: var(--night-muted);
+  font-size: var(--text-sm);
+}
+
+.presentNote svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.demoData {
+  max-width: 640px;
+}
+
+/* Call to action */
+.cta {
+  padding-block: var(--section-pad);
+  background: var(--color-tomato);
+  color: #fff;
+}
+
+.ctaInner {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  max-width: 760px;
+  text-align: center;
+}
+
+.ctaTitle {
+  color: #fff;
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3.2rem);
+}
+
+.ctaText {
+  font-size: var(--text-lg);
+}
+
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.ctaActions .ctaSecondary {
+  --btn-bg: transparent;
+  --btn-border: var(--color-cream);
+  --btn-fg: var(--color-cream);
+}
+
+.ctaActions .ctaSecondary:hover {
+  --btn-bg: var(--color-cream);
+  --btn-fg: var(--color-tomato-ink);
+}
+
+.cta :focus-visible {
+  outline-color: var(--color-cream);
+}
+
+@media (max-width: 479.98px) {
+  .ctaActions > * {
+    flex: 1 1 100%;
+  }
+}

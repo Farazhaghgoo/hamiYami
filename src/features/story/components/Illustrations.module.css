@@ -1,0 +1,198 @@
+/* Photos */
+.photo {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  background: var(--color-peach);
+  box-shadow: var(--shadow-md);
+}
+
+@media (min-width: 900px) {
+  .photo {
+    justify-self: center;
+    width: min(100%, calc(84svh - var(--header-h)));
+    aspect-ratio: 1;
+  }
+}
+
+.photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoNote {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(40 37 31 / 0.8);
+  color: var(--color-cream);
+  font-size: var(--text-xs);
+  font-weight: 650;
+}
+
+:global([data-shown="false"]) .photo img {
+  scale: 1.08;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .photo img {
+    transition: scale 1400ms var(--ease);
+  }
+}
+
+/* Drawings, on the dark "how it is now" chapter */
+.art {
+  --ink: #f4e3d3;
+  --accent: #e8806f;
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid #4d463c;
+  border-radius: var(--radius-lg);
+  background: #34302a;
+}
+
+.drawing {
+  width: min(100%, 320px);
+}
+
+.drawing svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.caption {
+  max-width: 34ch;
+  color: #e9dfd1;
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.stroke,
+.thin {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stroke {
+  stroke-width: 6;
+}
+
+.thin {
+  stroke-width: 4;
+}
+
+.accent {
+  fill: var(--accent);
+}
+
+.window {
+  fill: #4a3f37;
+}
+
+.bowls {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+.bowl {
+  display: grid;
+  flex: 1 1 0;
+  gap: var(--space-2);
+  justify-items: center;
+  max-width: 150px;
+}
+
+.bowl svg {
+  width: 100%;
+}
+
+.tag {
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--color-charcoal);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.questions {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+}
+
+.questions svg {
+  width: min(100%, 220px);
+}
+
+.bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+  padding: 0;
+  list-style: none;
+}
+
+.bubble {
+  padding: 4px 14px;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-pill) var(--radius-pill) var(--radius-pill) 4px;
+  color: var(--color-cream);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Short, finite, and only once the step is reached: nothing keeps moving beside the words. */
+  :global([data-shown="true"]) .steam {
+    animation: steam 2.2s ease-in-out 2;
+  }
+
+  :global([data-shown="true"]) .steamLate {
+    animation-delay: 0.4s;
+  }
+
+  :global([data-shown="true"]) .minute {
+    transform-origin: 112px 100px;
+    animation: tick 1.2s ease-in-out 1;
+  }
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.2;
+    translate: 0 4px;
+  }
+
+  50% {
+    opacity: 1;
+    translate: 0 -4px;
+  }
+}
+
+@keyframes tick {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+
+  50% {
+    rotate: 6deg;
+  }
+}

@@ -1,0 +1,102 @@
+.scrolly {
+  --card-bg: var(--color-surface);
+  --card-line: var(--color-line);
+  --card-ink: var(--color-charcoal);
+  --card-muted: var(--color-ink-muted);
+  --card-accent: var(--color-tomato);
+}
+
+.scrolly[data-tone="dark"] {
+  --card-bg: #34302a;
+  --card-line: #4d463c;
+  --card-ink: var(--color-cream);
+  --card-muted: #d9cdbd;
+  --card-accent: #e8806f;
+}
+
+.steps {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.step {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  color: var(--card-ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.card :where(p) {
+  color: var(--card-muted);
+}
+
+.step[data-active="true"] .card {
+  border-color: var(--card-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.stage {
+  min-width: 0;
+}
+
+/* Wide screens: the words scroll on the left while the graphic stays pinned on the right. */
+@media (min-width: 900px) {
+  .scrolly[data-wide] {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-7);
+  }
+
+  .scrolly[data-wide] .steps {
+    gap: 0;
+    padding-block: 8svh 18svh;
+  }
+
+  .scrolly[data-wide] .step {
+    min-height: 72svh;
+    align-content: center;
+  }
+
+  .scrolly[data-wide] .card {
+    max-width: 560px;
+  }
+
+  .pin {
+    position: sticky;
+    top: calc(var(--header-h) + 4svh);
+    display: grid;
+    height: calc(92svh - var(--header-h));
+    align-items: center;
+  }
+
+  .layer {
+    grid-area: 1 / 1;
+    min-width: 0;
+    opacity: 0;
+  }
+
+  .layer[data-active="true"] {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .layer {
+    transition: opacity 450ms var(--ease);
+  }
+
+  .card {
+    transition:
+      border-color 240ms var(--ease),
+      box-shadow 240ms var(--ease);
+  }
+}
